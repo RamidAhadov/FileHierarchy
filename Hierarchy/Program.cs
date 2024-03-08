@@ -1,3 +1,10 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using Hierarchy.HierarchyTree;
 
-Console.WriteLine("Hello, World!");
+var tree = new Tree("Folder");
+
+tree.AddFolder("New Folder");
+tree.AddFolder("New Folder 2");
+
+
+
+Console.WriteLine("Finish");
