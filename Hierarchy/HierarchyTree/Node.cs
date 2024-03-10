@@ -2,15 +2,15 @@ namespace Hierarchy.HierarchyTree;
 
 public abstract class Node
 {
-    public Node(string name, string path, Node? node, NodeType type)
+    public Node(string name, FolderNode? parent, NodeType type)
     {
         Name = name;
-        Path = path;
-        Parent = node;
+        Path = parent == null ? "../" : Utilities.Path.SetPath(parent.Path, parent.Name);
+        Parent = parent;
         Type = type;
     }
     public string Name { get; set; }
     public string Path { get; set; }
-    public Node? Parent { get; set; }
+    public FolderNode? Parent { get; set; }
     public NodeType Type { get; set; }
 }

@@ -12,7 +12,7 @@ public class Tree:IEnumerable<Node>
         _head = new FolderNode(name);
     }
 
-    public Tree(string name, Node parent):this(name)
+    public Tree(string name, FolderNode parent):this(name)
     {
         _head.Parent = parent;
     }

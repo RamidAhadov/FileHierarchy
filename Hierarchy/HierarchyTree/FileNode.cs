@@ -2,7 +2,7 @@ namespace Hierarchy.HierarchyTree;
 
 public class FileNode:Node
 {
-    public FileNode(string name, Node? parent) : base(name, Utilities.Path.SetPath(parent.Path, parent.Name), parent,NodeType.File)
+    public FileNode(string name, FolderNode? parent) : base(name, parent,NodeType.File)
     {
         _fileName = name;
     }

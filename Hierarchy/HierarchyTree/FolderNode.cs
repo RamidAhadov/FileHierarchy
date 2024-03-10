@@ -2,12 +2,11 @@ namespace Hierarchy.HierarchyTree;
 
 public class FolderNode:Node
 {
-    public FolderNode(string name, Node? parent) : base(name, Utilities.Path.SetPath(parent.Path, parent.Name), parent, NodeType.Folder)
+    public FolderNode(string name, FolderNode? parent) : base(name, parent, NodeType.Folder)
     {
         Children = new List<Node>();
-        //Path = Utilities.Path.SetPath(path, parent.Name);
     }
-    public FolderNode(string name):base(name,"../",default,NodeType.Folder)
+    public FolderNode(string name):base(name,default,NodeType.Folder)
     {
         Children = new List<Node>();
     }
