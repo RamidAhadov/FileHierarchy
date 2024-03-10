@@ -9,7 +9,7 @@ public class Tree:IEnumerable<Node>
 
     public Tree(string name)
     {
-        _head = new FolderNode(name, "../");
+        _head = new FolderNode(name);
     }
 
     public Tree(string name, Node parent):this(name)
