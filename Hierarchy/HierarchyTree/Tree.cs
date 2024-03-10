@@ -39,14 +39,58 @@ public class Tree:IEnumerable<Node>
         }
     }
 
-    public Node FindNode(string path)
+    public Node Find(string path)
     {
-        var folders = Path.SplitPath(path);
+        if (string.IsNullOrEmpty(path))
+        {
+            throw new ArgumentNullException();
+        }
+        var addresses = Path.SplitPath(path);
+
+        return Find(addresses);
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
+    }
+
+    private Node Find(string[] addresses)
+    {
+        if (addresses == null)
+        {
+            throw new NullReferenceException();
+        }
+
+        return RecursiveFind(addresses, _head);
+    }
+
+    private Node RecursiveFind(string[] addresses,FolderNode folder)
+    {
+        if (addresses.Length == 0)
+        {
+            return folder;
+        }
+        
+        var nodeName = addresses[0];
+        var node = folder.Children.FirstOrDefault(c => c.Name == nodeName);
+
+        if (node == null)
+        {
+            throw new NullReferenceException("Item cannot be find");
+        }
+
+        if (addresses.Length == 1)
+        {
+            return node;
+        }
+
+        if (node is FolderNode folderNode)
+        {
+            return RecursiveFind(addresses.Skip(1).ToArray(), folderNode);
+        }
+
+        return null;
     }
     
     private List<Node> GetAllNodes(FolderNode folderNode)
