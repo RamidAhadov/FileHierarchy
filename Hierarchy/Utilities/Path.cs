@@ -6,4 +6,10 @@ public class Path
     {
         return parentPath + parentName + "/";
     }
+
+    public static string[] SplitPath(string path)
+    {
+        var substring = path.Substring(3);
+        return substring.Split('/');
+    }
 }
