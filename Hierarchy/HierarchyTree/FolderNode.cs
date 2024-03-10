@@ -2,11 +2,11 @@ namespace Hierarchy.HierarchyTree;
 
 public class FolderNode:Node
 {
-    public FolderNode(string name, string path, Node? parent) : base(name, path, parent, NodeType.Folder)
+    public FolderNode(string name, FolderNode? parent) : base(name, parent, NodeType.Folder)
     {
         Children = new List<Node>();
     }
-    public FolderNode(string name, string path):base(name,path,default,NodeType.Folder)
+    public FolderNode(string name):base(name,default,NodeType.Folder)
     {
         Children = new List<Node>();
     }
@@ -37,7 +37,7 @@ public class FolderNode:Node
             throw new ArgumentNullException();
         }
 
-        var folder = new FolderNode(folderName, Path, this);
+        var folder = new FolderNode(folderName, this);
         
         AddChild(folder);
     }
