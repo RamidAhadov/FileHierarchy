@@ -14,10 +14,6 @@ public class FileNode:Node
         {
             return _fileName.Substring(_fileName.IndexOf('.') + 1);
         }
-        set
-        {
-            _fileName = value;
-        }
     }
 
     public int Size { get; set; }
