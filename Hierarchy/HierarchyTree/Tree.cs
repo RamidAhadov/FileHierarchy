@@ -3,7 +3,7 @@ using Path = Hierarchy.Utilities.Path;
 
 namespace Hierarchy.HierarchyTree;
 
-public class Tree:IEnumerable
+public class Tree:IEnumerable<Node>
 {
     private FolderNode _head;
 
@@ -18,110 +18,34 @@ public class Tree:IEnumerable
     }
 
     public int Count => _head.Count;
-    
-    public void AddFolder(string folderName)
+
+    public FolderNode GetRoot() => _head;
+
+    public IEnumerator<Node> GetEnumerator()
     {
-        if (string.IsNullOrEmpty(folderName))
+        foreach (var node in GetAllNodes(_head))
         {
-            throw new NullReferenceException();
+            yield return node;
         }
-        
-        _head.Children.Add(new FolderNode(folderName,Path.SetPath(_head.Path,_head.Name),_head));
-        _head.Count++;
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
     
-    public void AddFolder(FolderNode folder)
+    private List<Node> GetAllNodes(FolderNode folderNode)
     {
-        if (folder == null)
+        var list = new List<Node>();
+        foreach (var child in folderNode.Children)
         {
-            throw new NullReferenceException();
-        }
-        
-        AddNode(folder);
-        
-        if (folder.Children == null)
-        {
-            _head.Count++;
-        }
-        else
-        {
-            _head.Count += folder.Children.Count + 1;
-        }
-    }
-
-    public void AddFile(FileNode fileNode)
-    {
-        if (fileNode == null)
-        {
-            throw new NullReferenceException();
-        }
-        
-        AddNode(fileNode);
-    }
-
-    public void RemoveFolder(FolderNode folderNode)
-    {
-        if (folderNode == null)
-        {
-            throw new NullReferenceException();
-        }
-
-        if (!TryRemove(folderNode,_head))
-        {
-            throw new Exception("Folder cannot be found.");
-        }
-        
-        if (folderNode.Children == null || folderNode.Children.Count == 0)
-        {
-            _head.Count--;
-        }
-        else
-        {
-            _head.Count -= folderNode.Count;
-        }
-    }
-
-    public void RemoveFile(FileNode fileNode)
-    {
-        if (fileNode == null)
-        {
-            throw new NullReferenceException();
-        }
-
-        if (!TryRemove(fileNode,_head))
-        {
-            throw new Exception("File cannot be found.");
-        }
-
-        _head.Count--;
-    }
-
-    private void AddNode(Node node)
-    {
-        _head.Children.Add(node);
-    }
-
-    private bool TryRemove(Node node,FolderNode startNode)
-    {
-        if (startNode.Children.Contains(node))
-        {
-            _head.Children.Remove(node);
-            return true;
-        }
-
-        foreach (var child in startNode.Children)
-        {
-            if (child is FolderNode folderNode)
+            list.Add(child);
+            if (child is FolderNode node)
             {
-                TryRemove(node,folderNode);
+                list.AddRange(GetAllNodes(node));
             }
         }
 
-        return false;
-    }
-
-    public IEnumerator GetEnumerator()
-    {
-        throw new NotImplementedException();
+        return list;
     }
 }

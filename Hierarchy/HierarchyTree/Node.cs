@@ -7,6 +7,7 @@ public abstract class Node
         Name = name;
         Path = path;
         Parent = node;
+        Type = type;
     }
     public string Name { get; set; }
     public string Path { get; set; }
