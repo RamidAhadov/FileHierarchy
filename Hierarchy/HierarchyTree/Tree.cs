@@ -29,6 +29,21 @@ public class Tree:IEnumerable<Node>
         }
     }
 
+    public void Print()
+    {
+        var list = GetAllNodes(_head);
+        foreach (var node in list)
+        {
+            Console.WriteLine(node.Name);
+            Console.WriteLine(node.Path);
+        }
+    }
+
+    public Node FindNode(string path)
+    {
+        var folders = Path.SplitPath(path);
+    }
+
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
