@@ -50,6 +50,46 @@ public class Tree:IEnumerable<Node>
         return Find(addresses);
     }
 
+    public int GetTotalFolderCount()
+    {
+        return GetTotalFolderCount(_head);
+    }
+
+    public int GetTotalFileCount()
+    {
+        return GetTotalFileCount(_head);
+    }
+
+    private int GetTotalFolderCount(FolderNode folderNode)
+    {
+        int count = 0;
+        GetTotalCount(folderNode, ref count, NodeType.Folder);
+        return count;
+    }
+    
+    private int GetTotalFileCount(FolderNode folderNode)
+    {
+        int count = 0;
+        GetTotalCount(folderNode, ref count, NodeType.File);
+        return count;
+    }
+
+    private void GetTotalCount(FolderNode folderNode, ref int count, NodeType type)
+    {
+        foreach (var node in folderNode.Children)
+        {
+            if (node.Type == type)
+            {
+                count++;
+            }
+
+            if (node is FolderNode folder)
+            {
+                GetTotalCount(folder, ref count, type);
+            }
+        }
+    }
+
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
