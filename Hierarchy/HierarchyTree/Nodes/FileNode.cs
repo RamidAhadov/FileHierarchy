@@ -1,4 +1,4 @@
-namespace Hierarchy.HierarchyTree;
+namespace Hierarchy.HierarchyTree.Nodes;
 
 public class FileNode:Node
 {
