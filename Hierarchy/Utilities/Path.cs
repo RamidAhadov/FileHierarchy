@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace Hierarchy.Utilities;
 
 public class Path
@@ -16,5 +18,15 @@ public class Path
         var substring = path.Substring(3);
         
         return substring.Split('/').Skip(1).ToArray();
+    }
+
+    public static bool IsFolderPath(string[] addresses)
+    {
+        if (Regex.IsMatch(addresses[^1], @"\..+"))
+        {
+            return false;
+        }
+
+        return true;
     }
 }
