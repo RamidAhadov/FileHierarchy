@@ -1,4 +1,5 @@
 ﻿using Hierarchy.HierarchyTree;
+using Hierarchy.HierarchyTree.Nodes;
 
 var tree = new Tree("Folder");
 
@@ -38,5 +39,7 @@ Console.WriteLine(foundNode.Type);
 Console.WriteLine("Total folder(s): {0}",tree.GetTotalFolderCount());
 Console.WriteLine("Total file(s): {0}",tree.GetTotalFileCount());
 Console.WriteLine("Total item(s): {0}",tree.Count);
+
+tree.Print();
 
 Console.WriteLine("Finish");
