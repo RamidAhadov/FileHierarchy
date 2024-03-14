@@ -1,17 +1,51 @@
+using Hierarchy.Utilities;
+
 namespace Hierarchy.HierarchyTree.Nodes;
 
 public abstract class Node
 {
     private FolderNode _parent;
+    private string _name;
+    private string _path;
     public Node(string name, FolderNode? parent, NodeType type)
     {
-        Name = name;
-        Path = parent == null ? "../" : Utilities.Path.SetPath(parent.Path, parent.Name);
+        _name = name;
+        _path = parent == null ? "../" : Utilities.Path.SetPath(parent.Path, parent.Name);
         _parent = parent;
         Type = type;
     }
-    public string Name { get; set; }
-    public string Path { get; set; }
+
+    public string Name
+    {
+        get
+        {
+            return _name;
+        }
+        set
+        {
+            _name = value;
+            if (this is FolderNode folderNode)
+            {
+                UpdateChildrenPaths(folderNode);
+            }
+        }
+    }
+
+    public string Path
+    {
+        get
+        {
+            return _path;
+        }
+        set
+        {
+            _path = value;
+            if (this is FolderNode folderNode)
+            {
+                UpdateChildrenPaths(folderNode);
+            }
+        }
+    }
 
     public FolderNode? Parent
     {
@@ -22,7 +56,7 @@ public abstract class Node
             UpdatePath(_parent);
         }
     }
-    public NodeType Type { get; set; }
+    public NodeType Type { get; }
 
     public virtual void MoveNode(string newPath)
     {
@@ -32,13 +66,40 @@ public abstract class Node
             throw new Exception("Wrong path has entered.");
         }
 
-        var currentPathFolders = Utilities.Path.SplitPath(Path);
-
-        if (!IsUpper(ref newPathFolders,currentPathFolders))
+        var root = GetRootNode(this);
+        var newParent = (FolderNode)GetNode(newPathFolders, root);
+        if (Parent != null)
         {
-            
+            Parent.Children.Remove(this);
+        }
+        
+        Parent = newParent;
+        Parent.Children.Add(this);
+    }
+
+    public void Rename(string newName)
+    {
+        if (Type == NodeType.File)
+        {
+            NodeName.ValidateFileName(newName);
         }
 
+        if (Type == NodeType.Folder)
+        {
+            NodeName.ValidateFolderName(newName);
+        }
+        
+        Name = newName;
+    }
+    
+    private FolderNode GetRootNode(Node startNode)
+    {
+        if (startNode.Parent == null)
+        {
+            return (FolderNode)startNode;
+        }
+        
+        return GetRootNode(startNode.Parent);
     }
 
     private void UpdatePath(FolderNode parent)
@@ -46,31 +107,22 @@ public abstract class Node
         Path = parent == null ? "../" : Utilities.Path.SetPath(parent.Path, parent.Name);
     }
 
-    private void GoAddress(string[] address)
+    private void UpdateChildrenPaths(FolderNode node)
     {
-        
-    }
-
-    private bool IsUpper(ref string[] newPathAddress, string[] oldPathAddress)
-    {
-        int lowerCount = 0;
-        for (int i = 0; i < newPathAddress.GetUpperBound(0); i++)
+        foreach (var child in node.Children)
         {
-            if (newPathAddress[i] != oldPathAddress[i])
-            {
-                return true;
-            }
-
-            lowerCount++;
+            child.Path = Utilities.Path.SetPath(node.Path, node.Name);
         }
-
-        newPathAddress = newPathAddress.Skip(lowerCount).ToArray();
-
-        return false;
     }
 
-    private Node GetNode(string path, FolderNode startNode)
+    private Node GetNode(string[] path, FolderNode startNode)
     {
+        if (path.Length == 0)
+        {
+            return startNode;
+        }
+        var node = (FolderNode)startNode.Children.FirstOrDefault(n => n.Name == path[0] && n.Type == NodeType.Folder);
         
+        return GetNode(path.Skip(1).ToArray(),node);
     }
 }
