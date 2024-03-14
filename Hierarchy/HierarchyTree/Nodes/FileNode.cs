@@ -4,6 +4,11 @@ namespace Hierarchy.HierarchyTree.Nodes;
 
 public class FileNode:Node
 {
+    public FileNode(string name) : base(name, default, NodeType.File)
+    {
+        NodeName.ValidateFileName(name);
+        _fileName = name;
+    }
     public FileNode(string name, FolderNode? parent) : base(name, parent,NodeType.File)
     {
         NodeName.ValidateFileName(name);
