@@ -1,13 +1,17 @@
+using Hierarchy.Utilities;
+
 namespace Hierarchy.HierarchyTree.Nodes;
 
 public class FolderNode:Node
 {
     public FolderNode(string name, FolderNode? parent) : base(name, parent, NodeType.Folder)
     {
+        NodeName.ValidateFolderName(name);
         Children = new List<Node>();
     }
     public FolderNode(string name):base(name,default,NodeType.Folder)
     {
+        NodeName.ValidateFolderName(name);
         Children = new List<Node>();
     }
     public List<Node> Children { get; set; }
