@@ -6,6 +6,11 @@ public class Path
 {
     public static string SetPath(string parentPath, string parentName)
     {
+        if (parentName.Contains("/"))
+        {
+            parentName = parentName.Replace('/',':');
+        }
+        
         return parentPath + parentName + "/";
     }
 
@@ -22,6 +27,11 @@ public class Path
 
     public static bool IsFolderPath(string[] addresses)
     {
+        if (addresses.Length == 0)
+        {
+            return true;
+        }
+        
         if (Regex.IsMatch(addresses[^1], @"\..+"))
         {
             return false;
