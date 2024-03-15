@@ -4,34 +4,16 @@ namespace Hierarchy.HierarchyTree.Nodes;
 
 public class FileNode:Node
 {
-    public FileNode(string name) : base(name, default, NodeType.File)
+    public FileNode(string name) : this(name, default)
     {
-        try
-        {
-            NodeName.ValidateFileName(name);
-        }
-        catch (ArgumentException e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
         
+    }
+
+    public FileNode(string name, FolderNode? parent) : base(name, parent, NodeType.File)
+    {
         _fileName = name;
     }
-    public FileNode(string name, FolderNode? parent) : base(name, parent,NodeType.File)
-    {
-        try
-        {
-            NodeName.ValidateFileName(name);
-        }
-        catch (ArgumentException e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
-        
-        _fileName = name;
-    }
+
 
     private string _fileName;
     public string Extension
