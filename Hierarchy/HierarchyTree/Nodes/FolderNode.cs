@@ -4,16 +4,16 @@ namespace Hierarchy.HierarchyTree.Nodes;
 
 public class FolderNode:Node
 {
+    public FolderNode(string name):this(name,default)
+    {
+        
+    }
+    
     public FolderNode(string name, FolderNode? parent) : base(name, parent, NodeType.Folder)
     {
-        NodeName.ValidateFolderName(name);
         Children = new List<Node>();
     }
-    public FolderNode(string name):base(name,default,NodeType.Folder)
-    {
-        NodeName.ValidateFolderName(name);
-        Children = new List<Node>();
-    }
+    
     public List<Node> Children { get; set; }
 
     public int Count
@@ -36,16 +36,30 @@ public class FolderNode:Node
     
     public void AddFolder(string folderName)
     {
-        if (string.IsNullOrEmpty(folderName))
+        try
         {
-            throw new ArgumentNullException();
+            var folder = new FolderNode(folderName, this);
+            AddChild(folder);
         }
-
-        var folder = new FolderNode(folderName, this);
-        
-        AddChild(folder);
+        catch (ArgumentException e)
+        {
+            Console.WriteLine(e);
+        }
     }
 
+    public void AddFile(string fileName)
+    {
+        try
+        {
+            var file = new FileNode(fileName, this);
+            AddChild(file);
+        }
+        catch (ArgumentException e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+    
     public void AddFile(FileNode node)
     {
         if (node == null)

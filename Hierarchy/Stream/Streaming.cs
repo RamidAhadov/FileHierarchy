@@ -36,20 +36,14 @@ public partial class Streaming
         string[] children = Directory.GetFiles(path);
         foreach (var child in children)
         {
-            if (FileRegex().IsMatch(child))
-            {
-                folder.AddFile(new FileNode(Path.GetFileName(child)));
-            }
+            folder.AddFile(Path.GetFileName(child));
         }
 
         string[] subDirectories = Directory.GetDirectories(path);
         foreach (var subDirectory in subDirectories)
         {
             var folderName = Path.ReplaceIfExists(Path.GetFileName(subDirectory),':','/');
-            if (FolderRegex().IsMatch(folderName))
-            {
-                folder.AddFolder(folderName);
-            }
+            folder.AddFolder(folderName);
         }
 
         foreach (var child in folder.Children)
@@ -62,11 +56,4 @@ public partial class Streaming
             }
         }
     }
-
-    //TODO - Complete full regex
-    [GeneratedRegex("^[^:*?\\\"<>|]+\\.[a-zA-Z0-9]+$")]
-    private static partial Regex FileRegex();
-    
-    [GeneratedRegex("^[^:.]+$")]
-    private static partial Regex FolderRegex();
 }
