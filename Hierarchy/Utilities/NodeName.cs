@@ -6,17 +6,17 @@ public static class NodeName
 {
     public static void ValidateFileName(string name)
     {
-        if (!Regex.IsMatch(name,"^[^*:><\\|]*\\.(?!.*:)[a-zA-Z0-9]+$"))
+        if (!Regex.IsMatch(name,"^[^:]+\\.[^:]+$"))
         {
-            throw new ArgumentException();
+            throw new ArgumentException($"{name} is not correct file name.");
         }
     }
 
     public static void ValidateFolderName(string name)
     {
-        if (!Regex.IsMatch(name,"^([a-zA-Z0-9][^*/><?\\\\|:.]*)(?:\\\\.)?$"))
+        if (!Regex.IsMatch(name,"^[^:.]+$"))
         {
-            throw new ArgumentException();
+            throw new ArgumentException($"{name} is not correct file name.");
         }
     }
 }
