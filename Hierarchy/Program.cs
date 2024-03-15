@@ -1,4 +1,6 @@
 ﻿using Hierarchy.HierarchyTree;
+using Hierarchy.HierarchyTree.Nodes;
+using Hierarchy.Stream;
 
 var tree = new Tree("Folder");
 
@@ -21,6 +23,20 @@ foreach (var child in folder.Children)
     }
 }
 
+((FolderNode)((FolderNode)folder.Children[0]).Children[0]).AddFolder("Yeni folder");
+((FolderNode)((FolderNode)folder.Children[0]).Children[0]).AddFolder("Ikinci folder");
+
+
+var notNewedFolder = (FolderNode)((FolderNode)folder.Children[0]).Children[0];
+
+((FolderNode)folder.Children[0]).Children[0].MoveNode("../Folder");
+
+var movedNode = ((FolderNode)folder.Children[0]).Children[0];
+var movedNode1 = (FolderNode)folder.Children[^1];
+
+var newedFolder = (FolderNode)((FolderNode)folder.Children[0]).Children[0];
+folder.Children[1].Rename("Renamed1");
+
 foreach (var item in tree)
 {
     Console.WriteLine(item.Name);
@@ -35,8 +51,18 @@ foreach (var item in tree)
 var foundNode = tree.Find("../Folder");
 Console.WriteLine(foundNode.Type);
 
-Console.WriteLine("Total folder(s): {0}",tree.GetTotalFolderCount());
-Console.WriteLine("Total file(s): {0}",tree.GetTotalFileCount());
-Console.WriteLine("Total item(s): {0}",tree.Count);
+
+
+//tree.Print();
+
+var streaming = new Streaming();
+var newTree = streaming.ReadDirectory("/Users/macbook/Desktop/Ramid");
+var treeRoot = newTree.GetRoot();
+newTree.Print();
+
+Console.WriteLine("Total folder(s): {0}",newTree.GetTotalFolderCount());
+Console.WriteLine("Total file(s): {0}",newTree.GetTotalFileCount());
+Console.WriteLine("Total item(s): {0}",newTree.Count);
+
 
 Console.WriteLine("Finish");
