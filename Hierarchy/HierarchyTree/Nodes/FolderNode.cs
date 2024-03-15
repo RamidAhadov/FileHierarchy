@@ -6,12 +6,30 @@ public class FolderNode:Node
 {
     public FolderNode(string name, FolderNode? parent) : base(name, parent, NodeType.Folder)
     {
-        NodeName.ValidateFolderName(name);
+        try
+        {
+            NodeName.ValidateFolderName(name);
+        }
+        catch (ArgumentException e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        
         Children = new List<Node>();
     }
     public FolderNode(string name):base(name,default,NodeType.Folder)
     {
-        NodeName.ValidateFolderName(name);
+        try
+        {
+            NodeName.ValidateFolderName(name);
+        }
+        catch (ArgumentException e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        
         Children = new List<Node>();
     }
     public List<Node> Children { get; set; }
@@ -40,9 +58,8 @@ public class FolderNode:Node
         {
             throw new ArgumentNullException();
         }
-
-        var folder = new FolderNode(folderName, this);
         
+        var folder = new FolderNode(folderName, this);
         AddChild(folder);
     }
 
