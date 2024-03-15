@@ -39,4 +39,19 @@ public class Path
 
         return true;
     }
+
+    public static string GetFileName(string path)
+    {
+        return path.Split('/').ToArray()[^1];
+    }
+
+    public static string ReplaceIfExists(string nodeName, char oldChar, char newChar)
+    {
+        if (nodeName.Contains(oldChar))
+        {
+            return nodeName.Replace(oldChar, newChar);
+        }
+
+        return nodeName;
+    }
 }
