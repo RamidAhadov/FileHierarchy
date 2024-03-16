@@ -9,6 +9,7 @@ public abstract class Node
     private string _path;
     public Node(string name, FolderNode? parent, NodeType type)
     {
+        bool flag = true;
         name = name.Trim();
         try
         {
@@ -25,13 +26,21 @@ public abstract class Node
         catch (ArgumentException e)
         {
             Console.WriteLine(e);
-            throw;
+            flag = false;
         }
-        
-        _name = name;
-        _path = parent == null ? "../" : Utilities.Path.SetPath(parent.Path, parent.Name);
-        _parent = parent;
-        Type = type;
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            flag = false;
+        }
+
+        if (flag)
+        {
+            _name = name;
+            _path = parent == null ? "../" : Utilities.Path.SetPath(parent.Path, parent.Name);
+            _parent = parent;
+            Type = type;
+        }
     }
 
     public string Name
