@@ -29,12 +29,12 @@ public abstract class Node
         catch (ArgumentException e)
         {
             Console.WriteLine(e);
-            return;
+            throw;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return;
+            throw;
         }
         
         _name = name;
@@ -86,6 +86,7 @@ public abstract class Node
         }
     }
     public NodeType Type { get; }
+    public bool IsSelected { get; set; }
 
     public virtual void MoveNode(string newPath)
     {

@@ -11,17 +11,6 @@ public class FolderNode:Node
     
     public FolderNode(string name, FolderNode? parent) : base(name, parent, NodeType.Folder)
     {
-        name = name.Trim();
-        try
-        {
-            NodeName.ValidateFolderName(name);
-        }
-        catch (ArgumentException e)
-        {
-            Console.WriteLine(e);
-            return;
-        }
-        
         Children = new List<Node>();
     }
     
