@@ -4,11 +4,15 @@ namespace Hierarchy.HierarchyTree.Nodes;
 
 public abstract class Node
 {
+    //Configure GoUpper and GoLower.
+    //Find parent via stream.
+    //Move delete via stream
     private FolderNode _parent;
     private string _name;
     private string _path;
     public Node(string name, FolderNode? parent, NodeType type)
     {
+        // Bug - Test it
         bool flag = true;
         name = name.Trim();
         try
@@ -49,7 +53,7 @@ public abstract class Node
         {
             return _name;
         }
-        set
+        private set
         {
             _name = value;
             if (this is FolderNode folderNode)
@@ -85,6 +89,8 @@ public abstract class Node
         }
     }
     public NodeType Type { get; }
+    //New Feature
+    public bool IsSelected { get; set; }
 
     public virtual void MoveNode(string newPath)
     {
