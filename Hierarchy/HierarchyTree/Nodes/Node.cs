@@ -29,12 +29,12 @@ public abstract class Node
         catch (ArgumentException e)
         {
             Console.WriteLine(e);
-            throw;
+            //throw;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            throw;
+            //throw;
         }
         
         _name = name;
