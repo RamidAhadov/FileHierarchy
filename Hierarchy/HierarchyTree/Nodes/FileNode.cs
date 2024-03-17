@@ -11,6 +11,16 @@ public class FileNode:Node
 
     public FileNode(string name, FolderNode? parent) : base(name, parent, NodeType.File)
     {
+        name = name.Trim();
+        try
+        {
+            NodeName.ValidateFileName(name);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+        
         _fileName = name;
     }
 

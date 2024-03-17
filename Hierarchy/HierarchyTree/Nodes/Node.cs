@@ -13,7 +13,6 @@ public abstract class Node
     public Node(string name, FolderNode? parent, NodeType type)
     {
         // Bug - Test it
-        bool flag = true;
         name = name.Trim();
         try
         {
@@ -21,7 +20,7 @@ public abstract class Node
             {
                 NodeName.ValidateFileName(name);
             }
-
+        
             if (type == NodeType.Folder)
             {
                 NodeName.ValidateFolderName(name);
@@ -30,21 +29,19 @@ public abstract class Node
         catch (ArgumentException e)
         {
             Console.WriteLine(e);
-            flag = false;
+            return;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            flag = false;
+            return;
         }
-
-        if (flag)
-        {
-            _name = name;
-            _path = parent == null ? "../" : Utilities.Path.SetPath(parent.Path, parent.Name);
-            _parent = parent;
-            Type = type;
-        }
+        
+        _name = name;
+        _path = parent == null ? "../" : Utilities.Path.SetPath(parent.Path, parent.Name);
+        _parent = parent;
+        Type = type;
+        
     }
 
     public string Name
@@ -89,8 +86,6 @@ public abstract class Node
         }
     }
     public NodeType Type { get; }
-    //New Feature
-    public bool IsSelected { get; set; }
 
     public virtual void MoveNode(string newPath)
     {
