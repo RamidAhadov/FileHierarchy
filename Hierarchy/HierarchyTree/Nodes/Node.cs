@@ -4,11 +4,15 @@ namespace Hierarchy.HierarchyTree.Nodes;
 
 public abstract class Node
 {
+    //Configure GoUpper and GoLower.
+    //Find parent via stream.
+    //Move delete via stream
     private FolderNode _parent;
     private string _name;
     private string _path;
     public Node(string name, FolderNode? parent, NodeType type)
     {
+        // Bug - Test it
         name = name.Trim();
         try
         {
@@ -16,7 +20,7 @@ public abstract class Node
             {
                 NodeName.ValidateFileName(name);
             }
-
+        
             if (type == NodeType.Folder)
             {
                 NodeName.ValidateFolderName(name);
@@ -25,13 +29,19 @@ public abstract class Node
         catch (ArgumentException e)
         {
             Console.WriteLine(e);
-            throw;
+            //throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            //throw;
         }
         
         _name = name;
         _path = parent == null ? "../" : Utilities.Path.SetPath(parent.Path, parent.Name);
         _parent = parent;
         Type = type;
+        
     }
 
     public string Name
@@ -40,7 +50,7 @@ public abstract class Node
         {
             return _name;
         }
-        set
+        private set
         {
             _name = value;
             if (this is FolderNode folderNode)
@@ -76,6 +86,7 @@ public abstract class Node
         }
     }
     public NodeType Type { get; }
+    public bool IsSelected { get; set; }
 
     public virtual void MoveNode(string newPath)
     {
