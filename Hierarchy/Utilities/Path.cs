@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+#pragma warning disable CS8603 // Possible null reference return.
 
 namespace Hierarchy.Utilities;
 
@@ -10,7 +11,11 @@ public class Path
         {
             parentName = parentName.Replace('/',':');
         }
-        
+
+        if (!parentPath.EndsWith('/'))
+        {
+            return parentPath + "/" + parentName + "/";
+        }
         return parentPath + parentName + "/";
     }
 
@@ -20,7 +25,16 @@ public class Path
         {
             path = path.Substring(0, path.Length - 1);
         }
-        var substring = path.Substring(3);
+
+        string substring;
+        if (path.StartsWith("../"))
+        {
+            substring = path.Substring(3);
+        }
+        else
+        {
+            substring = path.Substring(1);
+        }
         
         return substring.Split('/').Skip(1).ToArray();
     }
@@ -53,5 +67,19 @@ public class Path
         }
 
         return nodeName;
+    }
+
+    public static string RemoveLastName(string path)
+    {
+        var splitPath = path.Split('/');
+        if (splitPath.Length == 1)
+        {
+            return path;
+        }
+        splitPath[^1] = null;
+
+        return splitPath.Where(pathNodes => !String.IsNullOrEmpty(pathNodes))
+            .Aggregate<string, string?>(null
+                ,(current, pathNodes) => current + "/" + pathNodes);
     }
 }
