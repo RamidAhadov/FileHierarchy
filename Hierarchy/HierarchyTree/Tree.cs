@@ -61,10 +61,28 @@ public class Tree:IEnumerable<Node>
         return GetTotalFileCount(_head);
     }
 
+    internal bool Exists(Node node)
+    {
+        if (node == null)
+        {
+            throw new NullReferenceException();
+        }
+        
+        string[] addresses = Path.SplitPath(node.Path);
+        var result = Find(addresses);
+        if (result == null)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     private int GetTotalFolderCount(FolderNode folderNode)
     {
         int count = 0;
         GetTotalCount(folderNode, ref count, NodeType.Folder);
+        
         return count;
     }
     
@@ -72,6 +90,7 @@ public class Tree:IEnumerable<Node>
     {
         int count = 0;
         GetTotalCount(folderNode, ref count, NodeType.File);
+        
         return count;
     }
 
