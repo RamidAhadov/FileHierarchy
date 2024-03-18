@@ -31,32 +31,41 @@ public class FolderNode:Node
             throw new NullReferenceException();
         }
         
-        AddChild(node);
+        try
+        {
+            AddChild(node);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
     }
     
     public void AddFolder(string folderName)
     {
+        var folder = new FolderNode(folderName, this);
+        
         try
         {
-            var folder = new FolderNode(folderName, this);
             AddChild(folder);
         }
-        catch (ArgumentException e)
+        catch (Exception e)
         {
-            Console.WriteLine(e);
+            Console.WriteLine(e.Message);
         }
     }
 
     public void AddFile(string fileName)
     {
+        var file = new FileNode(fileName, this);
+        
         try
         {
-            var file = new FileNode(fileName, this);
             AddChild(file);
         }
-        catch (ArgumentException e)
+        catch (Exception e)
         {
-            Console.WriteLine(e);
+            Console.WriteLine(e.Message);
         }
     }
     
@@ -66,8 +75,15 @@ public class FolderNode:Node
         {
             throw new NullReferenceException();
         }
-        
-        AddChild(node);
+
+        try
+        {
+            AddChild(node);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
     }
 
     public void RemoveFolder(FolderNode node)
@@ -95,6 +111,16 @@ public class FolderNode:Node
         if (Exists(addedNode))
         {
             throw new Exception($"{addedNode.Name} file already exists in this directory.");
+        }
+
+        switch (addedNode.Type)
+        {
+            case NodeType.File:
+                NodeName.ValidateFileName(addedNode.Name);
+                break;
+            case NodeType.Folder:
+                NodeName.ValidateFolderName(addedNode.Name);
+                break;
         }
         
         Children.Add(addedNode);
