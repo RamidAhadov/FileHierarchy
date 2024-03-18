@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Hierarchy.HierarchyTree;
 using Hierarchy.HierarchyTree.Nodes;
 using Path = Hierarchy.Utilities.Path;
@@ -6,19 +5,47 @@ using Path = Hierarchy.Utilities.Path;
 
 namespace Hierarchy.Stream;
 
-public partial class Streaming
+public class Streaming
 {
-    public Tree ReadDirectory(string path)
+    private Tree? _tree;
+    private string _rootPath;
+    public Streaming(string path)
     {
-        var tree = new Tree(new DirectoryInfo(path).Name);
+        _tree = new Tree(new DirectoryInfo(path).Name);
+        _rootPath = path;
         if (!Exists(path))
         {
             throw new DirectoryNotFoundException();
         }
         
-        GetChildren(tree.GetRoot(),path);
+        GetChildren(_tree.GetRoot(),path);
+    }
+    public Tree GetTree()
+    {
+        if (_tree == null)
+        {
+            throw new NullReferenceException();
+        }
 
-        return tree;
+        return _tree;
+    }
+
+    //Add select method to tree
+    //Move selected nodes
+    public void Move(Node node, string newPath)
+    {
+        if (!_tree.Exists(node))
+        {
+            throw new FileNotFoundException();
+        }
+
+        if (!Directory.Exists(newPath))
+        {
+            throw new DirectoryNotFoundException();
+        }
+
+        string sourcePath = Path.MergePaths(_rootPath, node.Path);
+        Directory.Move(sourcePath,newPath);
     }
 
     private bool Exists(string path)
