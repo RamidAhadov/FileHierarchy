@@ -24,53 +24,69 @@ public class FolderNode:Node
         }
     }
 
-    public void AddFolder(FolderNode node)
+    internal void AddFolder(FolderNode node)
     {
         if (node == null)
         {
             throw new NullReferenceException();
         }
         
-        AddChild(node);
-    }
-    
-    public void AddFolder(string folderName)
-    {
         try
         {
-            var folder = new FolderNode(folderName, this);
+            AddChild(node);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+    
+    internal void AddFolder(string folderName)
+    {
+        var folder = new FolderNode(folderName, this);
+        
+        try
+        {
             AddChild(folder);
         }
-        catch (ArgumentException e)
+        catch (Exception e)
         {
-            Console.WriteLine(e);
+            Console.WriteLine(e.Message);
         }
     }
 
-    public void AddFile(string fileName)
+    internal void AddFile(string fileName)
     {
+        var file = new FileNode(fileName, this);
+        
         try
         {
-            var file = new FileNode(fileName, this);
             AddChild(file);
         }
-        catch (ArgumentException e)
+        catch (Exception e)
         {
-            Console.WriteLine(e);
+            Console.WriteLine(e.Message);
         }
     }
     
-    public void AddFile(FileNode node)
+    internal void AddFile(FileNode node)
     {
         if (node == null)
         {
             throw new NullReferenceException();
         }
-        
-        AddChild(node);
+
+        try
+        {
+            AddChild(node);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
     }
 
-    public void RemoveFolder(FolderNode node)
+    internal void RemoveFolder(FolderNode node)
     {
         if (node == null)
         {
@@ -80,7 +96,7 @@ public class FolderNode:Node
         RemoveChild(node);
     }
     
-    public void RemoveFile(FileNode node)
+    internal void RemoveFile(FileNode node)
     {
         if (node == null)
         {
@@ -95,6 +111,16 @@ public class FolderNode:Node
         if (Exists(addedNode))
         {
             throw new Exception($"{addedNode.Name} file already exists in this directory.");
+        }
+
+        switch (addedNode.Type)
+        {
+            case NodeType.File:
+                NodeName.ValidateFileName(addedNode.Name);
+                break;
+            case NodeType.Folder:
+                NodeName.ValidateFolderName(addedNode.Name);
+                break;
         }
         
         Children.Add(addedNode);
