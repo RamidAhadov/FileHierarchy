@@ -82,4 +82,25 @@ public class Path
             .Aggregate<string, string?>(null
                 ,(current, pathNodes) => current + "/" + pathNodes);
     }
+
+    public static string MergePaths(string rootPath, string nodePath)
+    {
+        if (rootPath == null || nodePath == null)
+        {
+            throw new ArgumentNullException();
+        }
+
+        if (!rootPath.EndsWith('/'))
+        {
+            rootPath += "/";
+        }
+
+        if (nodePath.StartsWith("../"))
+        {
+            //Range indexer instead of Substring method.
+            nodePath = nodePath[3..];
+        }
+
+        return rootPath + nodePath;
+    }
 }
