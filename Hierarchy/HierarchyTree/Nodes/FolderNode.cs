@@ -24,7 +24,7 @@ public class FolderNode:Node
         }
     }
 
-    public void AddFolder(FolderNode node)
+    internal void AddFolder(FolderNode node)
     {
         if (node == null)
         {
@@ -41,7 +41,7 @@ public class FolderNode:Node
         }
     }
     
-    public void AddFolder(string folderName)
+    internal void AddFolder(string folderName)
     {
         var folder = new FolderNode(folderName, this);
         
@@ -55,7 +55,7 @@ public class FolderNode:Node
         }
     }
 
-    public void AddFile(string fileName)
+    internal void AddFile(string fileName)
     {
         var file = new FileNode(fileName, this);
         
@@ -69,7 +69,7 @@ public class FolderNode:Node
         }
     }
     
-    public void AddFile(FileNode node)
+    internal void AddFile(FileNode node)
     {
         if (node == null)
         {
@@ -86,7 +86,7 @@ public class FolderNode:Node
         }
     }
 
-    public void RemoveFolder(FolderNode node)
+    internal void RemoveFolder(FolderNode node)
     {
         if (node == null)
         {
@@ -96,7 +96,7 @@ public class FolderNode:Node
         RemoveChild(node);
     }
     
-    public void RemoveFile(FileNode node)
+    internal void RemoveFile(FileNode node)
     {
         if (node == null)
         {

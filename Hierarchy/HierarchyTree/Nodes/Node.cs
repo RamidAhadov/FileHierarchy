@@ -62,7 +62,7 @@ public abstract class Node
     public NodeType Type { get; }
     public bool IsSelected { get; set; }
 
-    public virtual void MoveNode(string newPath)
+    internal virtual void MoveNode(string newPath)
     {
         var newPathFolders = Utilities.Path.SplitPath(newPath);
         if (!Utilities.Path.IsFolderPath(newPathFolders))
@@ -81,7 +81,7 @@ public abstract class Node
         Parent.Children.Add(this);
     }
 
-    public void Rename(string newName)
+    internal void Rename(string newName)
     {
         if (Type == NodeType.File)
         {
