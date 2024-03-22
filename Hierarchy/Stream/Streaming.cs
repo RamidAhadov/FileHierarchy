@@ -32,19 +32,21 @@ public class Streaming
 
     //Add select method to tree
     //Move selected nodes
-    public void Move(Node node, string newPath)
+    public void MoveDirectory(FolderNode node, string newPath)
     {
         if (!_tree.Exists(node))
         {
             throw new FileNotFoundException();
         }
 
-        if (!Directory.Exists(newPath))
-        {
-            throw new DirectoryNotFoundException();
-        }
+        // if (!Directory.Exists(newPath))
+        // {
+        //     throw new DirectoryNotFoundException();
+        // }
 
         string sourcePath = Path.MergePaths(_rootPath, node.Path);
+        sourcePath = Path.SetPath(sourcePath,node.Name);
+        newPath = Path.MergePaths(newPath, node.Name);
         Directory.Move(sourcePath,newPath);
     }
 
