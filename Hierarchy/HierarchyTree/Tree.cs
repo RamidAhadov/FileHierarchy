@@ -131,8 +131,8 @@ public class Tree:IEnumerable<Node>
         {
             return folder;
         }
-        
-        var nodeName = addresses[0];
+
+        var nodeName = addresses[0].Replace(":", "/");
         var node = folder.Children.FirstOrDefault(c => c.Name == nodeName);
 
         if (node == null)

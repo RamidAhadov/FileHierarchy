@@ -101,6 +101,10 @@ public class Path
             nodePath = nodePath[3..];
         }
 
+        int slashIndex = nodePath.IndexOf('/');
+
+        nodePath = nodePath[(slashIndex + 1)..];
+
         return rootPath + nodePath;
     }
 }
