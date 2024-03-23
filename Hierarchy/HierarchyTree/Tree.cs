@@ -1,4 +1,5 @@
 using System.Collections;
+using Hierarchy.Exceptions;
 using Hierarchy.HierarchyTree.Nodes;
 using Path = Hierarchy.Utilities.Path;
 
@@ -78,6 +79,56 @@ public class Tree:IEnumerable<Node>
         return true;
     }
 
+    internal bool Exists(string path)
+    {
+        var addresses = Path.SplitPath(path);
+        var result = Find(addresses);
+        if (result == null)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    internal void RemoveNode(Node node)
+    {
+        var addresses = Path.SplitPath(node.Path);
+        var result = Find(addresses);
+        if (result == null)
+        {
+            throw new FolderNotFoundException($"{node.Name} not found.");
+        }
+
+        if (node == _head)
+        {
+            Clear();
+        }
+        else
+        {
+            //node.
+        }
+    }
+    
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+
+    //Should be use cache for rollback delete
+    private void Clear()
+    {
+        try
+        {
+            _head.Children.Clear();
+            _head = null;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+
     private int GetTotalFolderCount(FolderNode folderNode)
     {
         int count = 0;
@@ -108,11 +159,6 @@ public class Tree:IEnumerable<Node>
                 GetTotalCount(folder, ref count, type);
             }
         }
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
     }
 
     private Node Find(string[] addresses)
