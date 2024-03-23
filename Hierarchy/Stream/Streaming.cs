@@ -29,25 +29,40 @@ public class Streaming
 
         return _tree;
     }
-
-    //Add select method to tree
-    //Move selected nodes
-    public void MoveDirectory(FolderNode node, string newPath)
+    
+    public void MoveDirectory(FolderNode folderNode, string newPath)
     {
-        if (!_tree.Exists(node))
+        if (!_tree.Exists(folderNode))
         {
             throw new FileNotFoundException();
         }
 
-        // if (!Directory.Exists(newPath))
-        // {
-        //     throw new DirectoryNotFoundException();
-        // }
-
-        string sourcePath = Path.MergePaths(_rootPath, node.Path);
-        sourcePath = Path.SetPath(sourcePath,node.Name);
-        newPath = Path.MergePaths(newPath, node.Name);
+        string sourcePath = Path.MergePaths(_rootPath, folderNode.Path);
+        sourcePath = Path.SetPath(sourcePath,folderNode.Name);
+        newPath = Path.MergePaths(newPath, folderNode.Name);
+        var directoryInfo = new DirectoryInfo(newPath);
+        if (!_tree.Exists(newPath))
+        {
+            if (!directoryInfo.Exists)
+            {
+                throw new DirectoryNotFoundException();
+            }
+            
+            //_tree.
+        }
+        folderNode.MoveNode(newPath);
         Directory.Move(sourcePath,newPath);
+    }
+
+    public void MoveFile(FileNode fileNode, string newPath)
+    {
+        if (!_tree.Exists(fileNode))
+        {
+            throw new FileNotFoundException();
+        }
+
+        string sourcePath = Path.MergePaths(_rootPath, fileNode.Path);
+        //File.Move();
     }
 
     private bool Exists(string path)
