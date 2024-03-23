@@ -7,7 +7,7 @@ public abstract class Node
     //Configure GoUpper and GoLower.
     //Find parent via stream.
     //Move delete via stream
-    private FolderNode _parent;
+    private FolderNode? _parent;
     private string _name;
     private string _path;
     public Node(string name, FolderNode? parent, NodeType type)
@@ -94,6 +94,19 @@ public abstract class Node
         }
         
         Name = newName;
+    }
+
+    internal void Delete()
+    {
+        if (_parent != null)
+        {
+            _parent.Children.Remove(this);
+        }
+        else
+        {
+            //TODO
+            //this
+        }
     }
     
     private FolderNode GetRootNode(Node startNode)
