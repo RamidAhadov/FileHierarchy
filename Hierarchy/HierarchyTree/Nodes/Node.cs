@@ -1,13 +1,14 @@
+using Hierarchy.Exceptions;
 using Hierarchy.Utilities;
 
 namespace Hierarchy.HierarchyTree.Nodes;
 
-public abstract class Node
+public abstract class Node:IDisposable
 {
     //Configure GoUpper and GoLower.
     //Find parent via stream.
     //Move delete via stream
-    private FolderNode _parent;
+    private FolderNode? _parent;
     private string _name;
     private string _path;
     public Node(string name, FolderNode? parent, NodeType type)
@@ -61,6 +62,7 @@ public abstract class Node
     }
     public NodeType Type { get; }
     public bool IsSelected { get; set; }
+    internal bool Disposed { get; set; }
 
     internal virtual void MoveNode(string newPath)
     {
@@ -95,6 +97,19 @@ public abstract class Node
         
         Name = newName;
     }
+
+    internal void Delete()
+    {
+        if (_parent != null)
+        {
+            _parent.Children.Remove(this);
+            Dispose();
+        }
+        else
+        {
+            throw new DeleteRootException();
+        }
+    }
     
     private FolderNode GetRootNode(Node startNode)
     {
@@ -128,5 +143,11 @@ public abstract class Node
         var node = (FolderNode)startNode.Children.FirstOrDefault(n => n.Name == path[0] && n.Type == NodeType.Folder);
         
         return GetNode(path.Skip(1).ToArray(),node);
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        Disposed = true;
     }
 }

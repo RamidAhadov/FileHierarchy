@@ -69,8 +69,11 @@ public class Path
         return nodeName;
     }
 
-    public static string RemoveLastName(string path)
+    public static string RemoveLastSection(string path)
     {
+        path = path.TrimEnd('/');
+        var lastSlashIndex = path.LastIndexOf('/');
+        return path[..(lastSlashIndex + 1)];
         var splitPath = path.Split('/');
         if (splitPath.Length == 1)
         {
@@ -83,7 +86,7 @@ public class Path
                 ,(current, pathNodes) => current + "/" + pathNodes);
     }
 
-    public static string MergePaths(string rootPath, string nodePath)
+    public static string MergeTwoPaths(string rootPath, string nodePath)
     {
         if (rootPath == null || nodePath == null)
         {
@@ -101,6 +104,70 @@ public class Path
             nodePath = nodePath[3..];
         }
 
+        int slashIndex = nodePath.IndexOf('/');
+
+        nodePath = nodePath[(slashIndex + 1)..];
+
         return rootPath + nodePath;
+    }
+
+    public static string MergePaths(string basePath, params string[] paths)
+    {
+        if (paths.Length == 0)
+        {
+            return basePath;
+        }
+
+        if (!basePath.EndsWith("/"))
+        {
+            basePath += "/";
+        }
+
+        foreach (var path in CheckAndSetAddresses(paths))
+        {
+            basePath += path;
+        }
+
+        return basePath;
+    }
+
+    private static IEnumerable<string> CheckAndSetAddresses(string[] addresses)
+    {
+        for (int i = 0; i < addresses.Length; i++)
+        {
+            yield return FilterAddress(addresses[i]);
+        }
+    }
+
+    private static string FilterAddress(string address)
+    {
+        if (Regex.IsMatch(address,"^[^/]+/$"))
+        {
+            return address;
+        }
+        
+        if (address.StartsWith("../"))
+        {
+            address = address[3..];
+        }
+        
+        address = address.TrimStart('/');
+        
+        if (!address.EndsWith('/'))
+        {
+            address += "/";
+        }
+        
+        if (address.Length < 2)
+        {
+            throw new ArgumentException();
+        }
+        
+        if (address[..^1].Contains('/'))
+        {
+            address = address.Replace('/', ':');
+        }
+
+        return address;
     }
 }
