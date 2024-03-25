@@ -124,6 +124,10 @@ public class FolderNode:Node
         }
         
         Children.Add(addedNode);
+        if (Parent == null)
+        {
+            addedNode.Parent = this;
+        }
     }
 
     private void RemoveChild(Node removedNode)
