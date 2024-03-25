@@ -31,7 +31,53 @@ public class Streaming
         return _tree;
     }
     
-    public void MoveDirectory(FolderNode folderNode, string newPath)
+    public void MoveDirectory(FolderNode folder, string newPath)
+    {
+        try
+        {
+            MoveFolder(folder, newPath);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.InnerException?.Message);
+        }
+    }
+
+    public void MoveDirectory(string destPath, string newPath)
+    {
+        if (Path.IsFolderPath(destPath))
+        {
+            throw new ArgumentException($"{destPath} is not correct path.");
+        }
+
+        var folder = _tree.Find(destPath);
+        if (folder == null && folder.Type == NodeType.Folder)
+        {
+            throw new FolderNotFoundException("Destination folder not found.");
+        }
+
+        try
+        {
+            MoveFolder((FolderNode)folder, newPath);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.InnerException?.Message);
+        }
+    }
+
+    public void MoveFile(FileNode fileNode, string newPath)
+    {
+        if (!_tree.Exists(fileNode))
+        {
+            throw new FileNotFoundException();
+        }
+
+        string sourcePath = Path.MergePaths(_rootPath, fileNode.Path);
+        //File.Move();
+    }
+    
+    private void MoveFolder(FolderNode folderNode, string newPath)
     {
         if (!_tree.Exists(folderNode))
         {
@@ -65,18 +111,7 @@ public class Streaming
         
         Directory.Move(sourcePath,newPath);
     }
-
-    public void MoveFile(FileNode fileNode, string newPath)
-    {
-        if (!_tree.Exists(fileNode))
-        {
-            throw new FileNotFoundException();
-        }
-
-        string sourcePath = Path.MergePaths(_rootPath, fileNode.Path);
-        //File.Move();
-    }
-
+    
     private bool Exists(string path)
     {
         if (Directory.Exists(path))
