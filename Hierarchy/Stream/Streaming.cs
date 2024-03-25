@@ -1,3 +1,4 @@
+using Hierarchy.Exceptions;
 using Hierarchy.HierarchyTree;
 using Hierarchy.HierarchyTree.Nodes;
 using Path = Hierarchy.Utilities.Path;
@@ -37,20 +38,31 @@ public class Streaming
             throw new FileNotFoundException();
         }
 
-        string sourcePath = Path.MergePaths(_rootPath, folderNode.Path);
-        sourcePath = Path.SetPath(sourcePath,folderNode.Name);
+        string sourcePath = Path.MergePaths(Path.RemoveLastSection(_rootPath), folderNode.Path,folderNode.Name);
         newPath = Path.MergePaths(newPath, folderNode.Name);
-        var directoryInfo = new DirectoryInfo(newPath);
-        if (!_tree.Exists(newPath))
+        var directoryInfo = new DirectoryInfo(Path.RemoveLastSection(newPath));
+        if (!_tree.Exists(Path.RemoveLastSection(newPath)))
         {
             if (!directoryInfo.Exists)
             {
                 throw new DirectoryNotFoundException();
             }
-            
-            //_tree.
+
+            try
+            {
+                folderNode.Delete();
+            }
+            catch (DeleteRootException)
+            {
+                Console.WriteLine("Cannot move the root directory.");
+            }
         }
-        folderNode.MoveNode(newPath);
+
+        if (!folderNode.Disposed)
+        {
+            folderNode.MoveNode(newPath);
+        }
+        
         Directory.Move(sourcePath,newPath);
     }
 
