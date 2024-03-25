@@ -54,6 +54,26 @@ public class Path
         return true;
     }
 
+    public static bool IsFolderPath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || path.Length < 2)
+        {
+            return false;
+        }
+
+        if (!path.StartsWith('/') || path.Contains(':'))
+        {
+            return false;
+        }
+
+        if (path.Contains(':'))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     public static string GetFileName(string path)
     {
         return path.Split('/').ToArray()[^1];
@@ -73,17 +93,8 @@ public class Path
     {
         path = path.TrimEnd('/');
         var lastSlashIndex = path.LastIndexOf('/');
+        
         return path[..(lastSlashIndex + 1)];
-        var splitPath = path.Split('/');
-        if (splitPath.Length == 1)
-        {
-            return path;
-        }
-        splitPath[^1] = null;
-
-        return splitPath.Where(pathNodes => !String.IsNullOrEmpty(pathNodes))
-            .Aggregate<string, string?>(null
-                ,(current, pathNodes) => current + "/" + pathNodes);
     }
 
     public static string MergeTwoPaths(string rootPath, string nodePath)
