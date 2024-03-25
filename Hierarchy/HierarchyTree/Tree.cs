@@ -82,8 +82,15 @@ public class Tree:IEnumerable<Node>
     internal bool Exists(string path)
     {
         var addresses = Path.SplitPath(path);
-        var result = Find(addresses);
-        if (result == null)
+        try
+        {
+            var result = Find(addresses);
+            if (result == null)
+            {
+                return false;
+            }
+        }
+        catch (Exception)
         {
             return false;
         }
