@@ -8,10 +8,16 @@ namespace Hierarchy.HierarchyTree;
 public class Tree:IEnumerable<Node>
 {
     private FolderNode _head;
+    internal string? LocalRootPath;
 
     public Tree(string name)
     {
         _head = new FolderNode(name);
+    }
+
+    public Tree(string name, string realRootPath):this(name)
+    {
+        LocalRootPath = realRootPath;
     }
 
     public Tree(string name, FolderNode parent):this(name)
