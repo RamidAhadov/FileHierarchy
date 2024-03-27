@@ -67,11 +67,11 @@ public class Path
             return false;
         }
 
-        if (!path.StartsWith('/') || path.Contains(':'))
+        if (!path.StartsWith('/'))
         {
-            return false;
+            path = "/" + path;
         }
-
+        
         if (path.Contains(':'))
         {
             return false;
@@ -148,7 +148,7 @@ public class Path
         return basePath;
     }
 
-    public static string FindRelation(string basePath, string localPath)
+    public static string? FindRelation(string basePath, string localPath)
     {
         TrimBySymbol('/', ref basePath);
         TrimBySymbol('/', ref localPath);
@@ -165,7 +165,7 @@ public class Path
             }
             else
             {
-                throw new NodeNotFoundException();
+                return null;
             }
         }
 
@@ -222,9 +222,9 @@ public class Path
         return address;
     }
     
-    private static void TrimBySymbol(char symbol,ref string paths)
+    private static void TrimBySymbol(char symbol,ref string path)
     {
-        paths = paths.TrimStart(symbol).TrimEnd(symbol);
+        path = path.TrimStart(symbol).TrimEnd(symbol);
     }
 
     private static string[] SplitByChar(char symbol, string path)
