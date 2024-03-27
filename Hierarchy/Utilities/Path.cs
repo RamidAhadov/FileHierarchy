@@ -31,9 +31,13 @@ public class Path
         {
             substring = path.Substring(3);
         }
-        else
+        else if(path.StartsWith('/'))
         {
             substring = path.Substring(1);
+        }
+        else
+        {
+            substring = path;
         }
         
         return substring.Split('/').Skip(1).ToArray();
@@ -142,6 +146,40 @@ public class Path
         return basePath;
     }
 
+    public static string FindRelation(string basePath, string localPath)
+    {
+        TrimBySymbol('/', ref basePath);
+        TrimBySymbol('/', ref localPath);
+        var splitLocalPath = SplitByChar('/', localPath);
+        var splitBasePath = SplitByChar('/', basePath);
+        for (int i = 0; i < splitBasePath.Length; i++)
+        {
+            if (splitBasePath[i] == splitLocalPath[i])
+            {
+                if (i != splitBasePath.Length - 1)
+                {
+                    splitLocalPath[i] = null;
+                }
+            }
+            else
+            {
+                throw new ArgumentException();
+            }
+        }
+
+        var result = "../";
+        foreach (var pathSection in splitLocalPath)
+        {
+            if (pathSection!= null)
+            {
+                result = result + pathSection + "/";
+            }
+        }
+
+        return result;
+    }
+    
+
     private static IEnumerable<string> CheckAndSetAddresses(string[] addresses)
     {
         for (int i = 0; i < addresses.Length; i++)
@@ -180,5 +218,15 @@ public class Path
         }
 
         return address;
+    }
+    
+    private static void TrimBySymbol(char symbol,ref string paths)
+    {
+        paths = paths.TrimStart(symbol).TrimEnd(symbol);
+    }
+
+    private static string[] SplitByChar(char symbol, string path)
+    {
+        return path.Split(symbol);
     }
 }
