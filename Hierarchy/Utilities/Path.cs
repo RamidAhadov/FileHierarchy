@@ -1,4 +1,6 @@
 using System.Text.RegularExpressions;
+using Hierarchy.Exceptions;
+
 #pragma warning disable CS8603 // Possible null reference return.
 
 namespace Hierarchy.Utilities;
@@ -163,7 +165,7 @@ public class Path
             }
             else
             {
-                throw new ArgumentException();
+                throw new NodeNotFoundException();
             }
         }
 
