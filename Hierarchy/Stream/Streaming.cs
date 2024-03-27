@@ -9,11 +9,9 @@ namespace Hierarchy.Stream;
 public class Streaming
 {
     private Tree? _tree;
-    private string _rootPath;
     public Streaming(string path)
     {
-        _tree = new Tree(new DirectoryInfo(path).Name);
-        _rootPath = path;
+        _tree = new Tree(new DirectoryInfo(path).Name, path);
         if (!Exists(path))
         {
             throw new DirectoryNotFoundException();
@@ -35,22 +33,34 @@ public class Streaming
     {
         try
         {
-            MoveFolder(folder, newPath);
+            MoveFolder(folder, newPath,default);
         }
         catch (Exception e)
         {
+            //TODO - Will write logs in future.
             Console.WriteLine(e.InnerException?.Message);
         }
     }
 
     public void MoveDirectory(string destPath, string newPath)
     {
-        if (Path.IsFolderPath(destPath))
+        if (!Path.IsFolderPath(destPath))
         {
             throw new ArgumentException($"{destPath} is not correct path.");
         }
+        
+        var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, destPath);
+        if (treeRelationPath == null)
+        {
+            throw new FolderNotFoundException($"{destPath} not found in current hierarchy");
+        }
+        
+        if (!_tree.Exists(treeRelationPath))
+        {
+            throw new FolderNotFoundException($"{destPath} not found in current hierarchy");
+        }
 
-        var folder = _tree.Find(destPath);
+        var folder = _tree.Find(treeRelationPath);
         if (folder == null && folder.Type == NodeType.Folder)
         {
             throw new FolderNotFoundException("Destination folder not found.");
@@ -58,7 +68,7 @@ public class Streaming
 
         try
         {
-            MoveFolder((FolderNode)folder, newPath);
+            MoveFolder((FolderNode)folder, newPath,destPath);
         }
         catch (Exception e)
         {
@@ -73,18 +83,22 @@ public class Streaming
             throw new FileNotFoundException();
         }
 
-        string sourcePath = Path.MergePaths(_rootPath, fileNode.Path);
+        string sourcePath = Path.MergePaths(_tree.LocalRootPath, fileNode.Path);
         //File.Move();
     }
-    
-    private void MoveFolder(FolderNode folderNode, string newPath)
-    {
-        if (!_tree.Exists(folderNode))
-        {
-            throw new FileNotFoundException();
-        }
 
-        string sourcePath = Path.MergePaths(Path.RemoveLastSection(_rootPath), folderNode.Path,folderNode.Name);
+    private void MoveFolder(FolderNode folderNode, string newPath, string? destinationPath)
+    {
+        string sourcePath;
+        if (destinationPath == null)
+        {
+            sourcePath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath), folderNode.Path,folderNode.Name);
+        }
+        else
+        {
+            sourcePath = destinationPath;
+        }
+        
         newPath = Path.MergePaths(newPath, folderNode.Name);
         var directoryInfo = new DirectoryInfo(Path.RemoveLastSection(newPath));
         if (!_tree.Exists(Path.RemoveLastSection(newPath)))
