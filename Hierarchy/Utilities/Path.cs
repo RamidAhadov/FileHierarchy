@@ -1,4 +1,6 @@
 using System.Text.RegularExpressions;
+using Hierarchy.Exceptions;
+
 #pragma warning disable CS8603 // Possible null reference return.
 
 namespace Hierarchy.Utilities;
@@ -31,9 +33,13 @@ public class Path
         {
             substring = path.Substring(3);
         }
-        else
+        else if(path.StartsWith('/'))
         {
             substring = path.Substring(1);
+        }
+        else
+        {
+            substring = path;
         }
         
         return substring.Split('/').Skip(1).ToArray();
@@ -61,11 +67,11 @@ public class Path
             return false;
         }
 
-        if (!path.StartsWith('/') || path.Contains(':'))
+        if (!path.StartsWith('/'))
         {
-            return false;
+            path = "/" + path;
         }
-
+        
         if (path.Contains(':'))
         {
             return false;
@@ -142,6 +148,40 @@ public class Path
         return basePath;
     }
 
+    public static string? FindRelation(string basePath, string localPath)
+    {
+        TrimBySymbol('/', ref basePath);
+        TrimBySymbol('/', ref localPath);
+        var splitLocalPath = SplitByChar('/', localPath);
+        var splitBasePath = SplitByChar('/', basePath);
+        for (int i = 0; i < splitBasePath.Length; i++)
+        {
+            if (splitBasePath[i] == splitLocalPath[i])
+            {
+                if (i != splitBasePath.Length - 1)
+                {
+                    splitLocalPath[i] = null;
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        var result = "../";
+        foreach (var pathSection in splitLocalPath)
+        {
+            if (pathSection!= null)
+            {
+                result = result + pathSection + "/";
+            }
+        }
+
+        return result;
+    }
+    
+
     private static IEnumerable<string> CheckAndSetAddresses(string[] addresses)
     {
         for (int i = 0; i < addresses.Length; i++)
@@ -180,5 +220,15 @@ public class Path
         }
 
         return address;
+    }
+    
+    private static void TrimBySymbol(char symbol,ref string path)
+    {
+        path = path.TrimStart(symbol).TrimEnd(symbol);
+    }
+
+    private static string[] SplitByChar(char symbol, string path)
+    {
+        return path.Split(symbol);
     }
 }
