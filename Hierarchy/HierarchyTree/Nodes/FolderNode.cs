@@ -31,42 +31,21 @@ public class FolderNode:Node
             throw new NullReferenceException();
         }
         
-        try
-        {
-            AddChild(node);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
+        AddChild(node);
     }
     
     internal void AddFolder(string folderName)
     {
         var folder = new FolderNode(folderName, this);
         
-        try
-        {
-            AddChild(folder);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
+        AddChild(folder);
     }
 
     internal void AddFile(string fileName)
     {
         var file = new FileNode(fileName, this);
         
-        try
-        {
-            AddChild(file);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
+        AddChild(file);
     }
     
     internal void AddFile(FileNode node)
@@ -75,15 +54,8 @@ public class FolderNode:Node
         {
             throw new NullReferenceException();
         }
-
-        try
-        {
-            AddChild(node);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
+        
+        AddChild(node);
     }
 
     internal void RemoveFolder(FolderNode node)
