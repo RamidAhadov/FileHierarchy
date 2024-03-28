@@ -31,12 +31,15 @@ public class Streaming
     
     public void MoveDirectory(FolderNode folder, string newPath)
     {
-        if (!_tree.Exists(folder))
+        try
         {
-            throw new FolderNotFoundException($"{folder.Name} not exists in current context.");
+            MoveFolder(folder, newPath,default);
         }
-        
-        MoveFolder(folder, newPath,default);
+        catch (Exception e)
+        {
+            //TODO - Will write logs in future.
+            Console.WriteLine(e.InnerException?.Message);
+        }
     }
 
     public void MoveDirectory(string destPath, string newPath)
@@ -62,8 +65,15 @@ public class Streaming
         {
             throw new FolderNotFoundException("Destination folder not found.");
         }
-        
-        MoveFolder((FolderNode)folder, newPath,destPath);
+
+        try
+        {
+            MoveFolder((FolderNode)folder, newPath,destPath);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.InnerException?.Message);
+        }
     }
 
     public void MoveFile(FileNode fileNode, string newPath)
@@ -98,7 +108,14 @@ public class Streaming
                 throw new DirectoryNotFoundException();
             }
 
-            folderNode.Delete();
+            try
+            {
+                folderNode.Delete();
+            }
+            catch (DeleteRootException)
+            {
+                Console.WriteLine("Cannot move the root directory.");
+            }
         }
 
         if (!folderNode.Disposed)
