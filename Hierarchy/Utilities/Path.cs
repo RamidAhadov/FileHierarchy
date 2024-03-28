@@ -23,6 +23,11 @@ public class Path
 
     public static string[] SplitPath(string path)
     {
+        if (string.IsNullOrEmpty(path))
+        {
+            return Array.Empty<string>();
+        }
+        
         if (path.EndsWith("/"))
         {
             path = path.Substring(0, path.Length - 1);
@@ -42,7 +47,7 @@ public class Path
             substring = path;
         }
         
-        return substring.Split('/').Skip(1).ToArray();
+        return substring.Split('/');
     }
 
     public static bool IsFolderPath(string[] addresses)
@@ -101,6 +106,24 @@ public class Path
         var lastSlashIndex = path.LastIndexOf('/');
         
         return path[..(lastSlashIndex + 1)];
+    }
+
+    public static string RemoveFirstSection(string path)
+    {
+        if (path.StartsWith("../"))
+        {
+            path = path[3..];
+        }
+        
+        path = path.TrimStart('/');
+
+        if (!path.EndsWith('/'))
+        {
+            path += "/";
+        }
+        var firstSlashIndex = path.IndexOf('/');
+        
+        return path[(firstSlashIndex + 1)..];
     }
 
     public static string MergeTwoPaths(string rootPath, string nodePath)
