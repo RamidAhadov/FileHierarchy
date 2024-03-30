@@ -78,13 +78,32 @@ public class Streaming
 
     public void MoveFile(FileNode fileNode, string newPath)
     {
-        if (!_tree.Exists(fileNode))
+        string sourcePath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath), Path.SplitPath(fileNode.Path));
+
+        string filePath;
+        string newFilePath;
+        try
         {
-            throw new FileNotFoundException();
+            filePath = Path.MergeFileNameToPath(sourcePath, fileNode.Name);
+            newFilePath = Path.MergeFileNameToPath(newPath, fileNode.Name);
+        }
+        catch (ArgumentException)
+        {
+            return;
         }
 
-        string sourcePath = Path.MergePaths(_tree.LocalRootPath, fileNode.Path);
-        //File.Move();
+        var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, newPath);
+        if (treeRelationPath == null)
+        {
+            AdjustTree(fileNode,filePath,NodeType.File);
+        }
+
+        if (!fileNode.Disposed)
+        {
+            fileNode.MoveNode(treeRelationPath);
+        }
+
+        File.Move(filePath,newFilePath);
     }
 
     private void MoveFolder(FolderNode folderNode, string newPath, string? destinationPath)
@@ -100,27 +119,15 @@ public class Streaming
         }
         
         newPath = Path.MergePaths(newPath, folderNode.Name);
-        var directoryInfo = new DirectoryInfo(Path.RemoveLastSection(newPath));
-        if (!_tree.Exists(Path.RemoveLastSection(newPath)))
+        var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, newPath);
+        if (!_tree.Exists(Path.RemoveLastSection(treeRelationPath)))
         {
-            if (!directoryInfo.Exists)
-            {
-                throw new DirectoryNotFoundException();
-            }
-
-            try
-            {
-                folderNode.Delete();
-            }
-            catch (DeleteRootException)
-            {
-                Console.WriteLine("Cannot move the root directory.");
-            }
+            AdjustTree(folderNode, newPath, NodeType.Folder);
         }
 
         if (!folderNode.Disposed)
         {
-            folderNode.MoveNode(newPath);
+            folderNode.MoveNode(treeRelationPath);
         }
         
         Directory.Move(sourcePath,newPath);
@@ -134,6 +141,38 @@ public class Streaming
         }
 
         return false;
+    }
+
+    private void AdjustTree(Node node, string path, NodeType type)
+    {
+        var info = GetFileSystemInfo(path, type);
+
+        if (!CheckInfoExists(info))
+        {
+            throw type switch
+            {
+                NodeType.File => new DirectoryNotFoundException(),
+                NodeType.Folder => new FileNotFoundException(),
+                _ => throw new InvalidOperationException("Unknown NodeType")
+            };
+        }
+
+        node.Delete();
+    }
+
+    private FileSystemInfo GetFileSystemInfo(string path, NodeType type)
+    {
+        return type switch
+        {
+            NodeType.File => new FileInfo(path),
+            NodeType.Folder => new DirectoryInfo(Path.RemoveLastSection(path)),
+            _ => throw new InvalidOperationException("Unknown NodeType")
+        };
+    }
+
+    private bool CheckInfoExists(FileSystemInfo info)
+    {
+        return info.Exists;
     }
 
     private void GetChildren(FolderNode folder,string path)
