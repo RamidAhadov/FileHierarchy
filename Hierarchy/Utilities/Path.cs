@@ -171,6 +171,18 @@ public class Path
         return basePath;
     }
 
+    public static string MergeFileNameToPath(string path, string fileName)
+    {
+        if (!path.EndsWith('/'))
+        {
+            path += "/";
+        }
+        
+        NodeName.ValidateFileName(fileName);
+
+        return path + fileName;
+    }
+
     public static string? FindRelation(string basePath, string localPath)
     {
         TrimBySymbol('/', ref basePath);
