@@ -37,13 +37,13 @@ public class Tree:IEnumerable<Node>
         }
     }
 
-    public void Print()
+    public IEnumerable<string> Print()
     {
         var list = GetAllNodes(_head);
         foreach (var node in list)
         {
-            Console.WriteLine(node.Name);
-            Console.WriteLine(node.Path);
+            yield return node.Name;
+            yield return node.Path;
         }
     }
 
