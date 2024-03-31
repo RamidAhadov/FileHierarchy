@@ -72,16 +72,6 @@ public class Path
             return false;
         }
 
-        if (!path.StartsWith('/'))
-        {
-            path = "/" + path;
-        }
-        
-        if (path.Contains(':'))
-        {
-            return false;
-        }
-
         return true;
     }
 
