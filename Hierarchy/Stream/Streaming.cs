@@ -33,7 +33,7 @@ public class Streaming
     {
         try
         {
-            MoveFolder(folder, newPath,default);
+            MoveNode(folder, newPath,default);
         }
         catch (Exception e)
         {
@@ -68,7 +68,7 @@ public class Streaming
 
         try
         {
-            MoveFolder((FolderNode)folder, newPath,destPath);
+            MoveNode(folder, newPath,destPath);
         }
         catch (Exception e)
         {
@@ -78,59 +78,75 @@ public class Streaming
 
     public void MoveFile(FileNode fileNode, string newPath)
     {
-        string sourcePath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath), Path.SplitPath(fileNode.Path));
-
-        string filePath;
-        string newFilePath;
-        try
-        {
-            filePath = Path.MergeFileNameToPath(sourcePath, fileNode.Name);
-            newFilePath = Path.MergeFileNameToPath(newPath, fileNode.Name);
-        }
-        catch (ArgumentException)
-        {
-            return;
-        }
-
-        var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, newPath);
-        if (treeRelationPath == null)
-        {
-            AdjustTree(fileNode,filePath,NodeType.File);
-        }
-
-        if (!fileNode.Disposed)
-        {
-            fileNode.MoveNode(treeRelationPath);
-        }
-
-        File.Move(filePath,newFilePath);
+        MoveNode(fileNode,newPath,default);
     }
 
-    private void MoveFolder(FolderNode folderNode, string newPath, string? destinationPath)
+    public void MoveFile(string destPath, string newPath)
+    {
+        if (!Path.IsFolderPath(destPath))
+        {
+            throw new ArgumentException($"{destPath} is not correct path.");
+        }
+        
+        var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, destPath);
+        if (treeRelationPath == null)
+        {
+            throw new FolderNotFoundException($"{destPath} not found in current hierarchy");
+        }
+        
+        if (!_tree.Exists(treeRelationPath))
+        {
+            throw new FolderNotFoundException($"{destPath} not found in current hierarchy");
+        }
+
+        var movedFile = _tree.Find(treeRelationPath);
+        MoveNode(movedFile,newPath,destPath);
+    }
+
+    private void MoveNode(Node node, string newPath, string? destinationPath)
     {
         string sourcePath;
         if (destinationPath == null)
         {
-            sourcePath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath), folderNode.Path,folderNode.Name);
+            var splitNodePath = Path.SplitPath(node.Path);
+            sourcePath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath), splitNodePath);
+            if (node.Type == NodeType.File)
+            {
+                sourcePath = Path.MergeFileNameToPath(sourcePath, node.Name);
+            }
+            else
+            {
+                sourcePath = Path.MergePaths(sourcePath, node.Name);
+            }
+            
         }
         else
         {
             sourcePath = destinationPath;
         }
-        
-        newPath = Path.MergePaths(newPath, folderNode.Name);
+
         var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, newPath);
-        if (!_tree.Exists(Path.RemoveLastSection(treeRelationPath)))
+        if (treeRelationPath == null || !_tree.Exists(Path.RemoveLastSection(treeRelationPath)))
         {
-            AdjustTree(folderNode, newPath, NodeType.Folder);
+            AdjustTree(node, newPath, node.Type);
         }
 
-        if (!folderNode.Disposed)
+        if (!node.Disposed)
         {
-            folderNode.MoveNode(treeRelationPath);
+            node.MoveNode(treeRelationPath);
         }
-        
-        Directory.Move(sourcePath,newPath);
+
+        newPath = Path.MergePaths(newPath, node.Name);
+        switch (node.Type)
+        {
+            case NodeType.File:
+                newPath = newPath.TrimEnd('/');
+                File.Move(sourcePath, newPath);
+                break;
+            case NodeType.Folder:
+                Directory.Move(sourcePath, newPath);
+                break;
+        }
     }
     
     private bool Exists(string path)
@@ -145,9 +161,9 @@ public class Streaming
 
     private void AdjustTree(Node node, string path, NodeType type)
     {
-        var info = GetFileSystemInfo(path, type);
+        var info = GetFileSystemInfo(path);
 
-        if (!CheckInfoExists(info))
+        if (!info.Exists)
         {
             throw type switch
             {
@@ -160,19 +176,9 @@ public class Streaming
         node.Delete();
     }
 
-    private FileSystemInfo GetFileSystemInfo(string path, NodeType type)
+    private FileSystemInfo GetFileSystemInfo(string path)
     {
-        return type switch
-        {
-            NodeType.File => new FileInfo(path),
-            NodeType.Folder => new DirectoryInfo(Path.RemoveLastSection(path)),
-            _ => throw new InvalidOperationException("Unknown NodeType")
-        };
-    }
-
-    private bool CheckInfoExists(FileSystemInfo info)
-    {
-        return info.Exists;
+        return new DirectoryInfo(Path.RemoveLastSection(path).TrimEnd('/'));
     }
 
     private void GetChildren(FolderNode folder,string path)
