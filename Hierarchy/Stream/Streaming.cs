@@ -12,7 +12,7 @@ public class Streaming
     public Streaming(string path)
     {
         _tree = new Tree(new DirectoryInfo(path).Name, path);
-        if (CheckDiskForExists(path, NodeType.Folder))
+        if (!CheckDiskForExists(path,NodeType.Folder))
         {
             throw new DirectoryNotFoundException();
         }
@@ -205,7 +205,7 @@ public class Streaming
 
     private void AdjustTree(Node node, string path, NodeType type)
     {
-        var info = GetFileSystemInfo(path, type);
+        var info = GetFileSystemInfo(path, NodeType.Folder);
 
         if (!info.Exists)
         {
@@ -225,7 +225,7 @@ public class Streaming
         switch (type)
         {
             case NodeType.Folder:
-                return new DirectoryInfo(Path.RemoveLastSection(path).TrimEnd('/'));
+                return new DirectoryInfo(path);
             case NodeType.File:
                 return new FileInfo(path);
             default:

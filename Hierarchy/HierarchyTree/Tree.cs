@@ -37,13 +37,13 @@ public class Tree:IEnumerable<Node>
         }
     }
 
-    public void Print()
+    public IEnumerable<string> Print()
     {
         var list = GetAllNodes(_head);
         foreach (var node in list)
         {
-            Console.WriteLine(node.Name);
-            Console.WriteLine(node.Path);
+            yield return node.Name;
+            yield return node.Path;
         }
     }
 
@@ -133,18 +133,10 @@ public class Tree:IEnumerable<Node>
         return GetEnumerator();
     }
 
-    //Should be use cache for rollback delete
     private void Clear()
     {
-        try
-        {
-            _head.Children.Clear();
-            _head = null;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
+        _head.Children.Clear();
+        _head = null;
     }
 
     private int GetTotalFolderCount(FolderNode folderNode)
