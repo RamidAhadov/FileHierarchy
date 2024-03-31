@@ -133,18 +133,10 @@ public class Tree:IEnumerable<Node>
         return GetEnumerator();
     }
 
-    //Should be use cache for rollback delete
     private void Clear()
     {
-        try
-        {
-            _head.Children.Clear();
-            _head = null;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
+        _head.Children.Clear();
+        _head = null;
     }
 
     private int GetTotalFolderCount(FolderNode folderNode)
