@@ -31,14 +31,7 @@ public class Streaming
     
     public void MoveDirectory(FolderNode folder, string newPath)
     {
-        try
-        {
-            MoveNode(folder, newPath,default);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.InnerException?.Message);
-        }
+        MoveNode(folder, newPath,default);
     }
 
     public void MoveDirectory(string destPath, string newPath)
@@ -65,14 +58,9 @@ public class Streaming
             throw new FolderNotFoundException("Destination folder not found.");
         }
 
-        try
-        {
-            MoveNode(folder, newPath,destPath);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.InnerException?.Message);
-        }
+        
+        MoveNode(folder, newPath,destPath);
+        
     }
 
     public void MoveFile(FileNode fileNode, string newPath)
