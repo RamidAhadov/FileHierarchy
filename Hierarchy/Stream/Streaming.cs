@@ -8,11 +8,11 @@ namespace Hierarchy.Stream;
 
 public class Streaming
 {
-    private Tree? _tree;
+    private readonly Tree? _tree;
     public Streaming(string path)
     {
         _tree = new Tree(new DirectoryInfo(path).Name, path);
-        if (!Exists(path))
+        if (CheckDiskForExists(path, NodeType.Folder))
         {
             throw new DirectoryNotFoundException();
         }
@@ -33,11 +33,10 @@ public class Streaming
     {
         try
         {
-            MoveFolder(folder, newPath,default);
+            MoveNode(folder, newPath,default);
         }
         catch (Exception e)
         {
-            //TODO - Will write logs in future.
             Console.WriteLine(e.InnerException?.Message);
         }
     }
@@ -49,7 +48,7 @@ public class Streaming
             throw new ArgumentException($"{destPath} is not correct path.");
         }
         
-        var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, destPath);
+        var treeRelationPath = Path.FindRelation(_tree?.LocalRootPath, destPath);
         if (treeRelationPath == null)
         {
             throw new FolderNotFoundException($"{destPath} not found in current hierarchy");
@@ -61,14 +60,14 @@ public class Streaming
         }
 
         var folder = _tree.Find(treeRelationPath);
-        if (folder == null && folder.Type == NodeType.Folder)
+        if (folder == null && folder?.Type == NodeType.Folder)
         {
             throw new FolderNotFoundException("Destination folder not found.");
         }
 
         try
         {
-            MoveFolder((FolderNode)folder, newPath,destPath);
+            MoveNode(folder, newPath,destPath);
         }
         catch (Exception e)
         {
@@ -78,62 +77,160 @@ public class Streaming
 
     public void MoveFile(FileNode fileNode, string newPath)
     {
-        if (!_tree.Exists(fileNode))
-        {
-            throw new FileNotFoundException();
-        }
-
-        string sourcePath = Path.MergePaths(_tree.LocalRootPath, fileNode.Path);
-        //File.Move();
+        MoveNode(fileNode,newPath,default);
     }
 
-    private void MoveFolder(FolderNode folderNode, string newPath, string? destinationPath)
+    public void MoveFile(string destPath, string newPath)
+    {
+        if (!Path.IsFolderPath(destPath))
+        {
+            throw new ArgumentException($"{destPath} is not correct path.");
+        }
+        
+        var treeRelationPath = Path.FindRelation(_tree?.LocalRootPath, destPath);
+        if (treeRelationPath == null)
+        {
+            throw new FolderNotFoundException($"{destPath} not found in current hierarchy");
+        }
+        
+        if (!_tree.Exists(treeRelationPath))
+        {
+            throw new FolderNotFoundException($"{destPath} not found in current hierarchy");
+        }
+
+        var movedFile = _tree.Find(treeRelationPath);
+        MoveNode(movedFile,newPath,destPath);
+    }
+
+    public void Remove(Node node)
+    {
+        var localNodePath = Path.MergePaths(Path.RemoveLastSection(_tree?.LocalRootPath)
+            , Path.SplitPath(node.Path));
+        CheckDiskForExists(node, localNodePath);
+        DeleteNode(node, localNodePath);
+    }
+
+    public void Remove(string localNodePath)
+    {
+        var treeRelationPath = Path.FindRelation(_tree?.LocalRootPath, localNodePath);
+        if (treeRelationPath == null)
+        {
+            throw new NodeNotFoundException("The node not found in current hierarchy");
+        }
+        
+        var node = _tree.Find(treeRelationPath);
+        CheckDiskForExists(node, localNodePath);
+        DeleteNode(node, localNodePath);
+    }
+
+    private static void DeleteNode(Node node, string localNodePath)
+    {
+        node.Delete();
+        var type = node.Type;
+        switch (type)
+        {
+            case NodeType.Folder:
+                Directory.Delete(localNodePath);
+                break;
+            case NodeType.File:
+                File.Delete(localNodePath);
+                break;
+        }
+    }
+
+    private void CheckDiskForExists(Node node, string localNodePath)
+    {
+        var info = GetFileSystemInfo(localNodePath, node.Type);
+        if (!info.Exists)
+        {
+            throw node.Type switch
+            {
+                NodeType.Folder => new DirectoryNotFoundException($"{node.Name} not exist in the disk."),
+                NodeType.File => new FileNotFoundException($"{node.Name} not exist in the disk."),
+                _ => new InvalidOperationException("Unknown NodeType")
+            };
+        }
+    }
+
+    private bool CheckDiskForExists(string localNodePath, NodeType type)
+    {
+        var info = GetFileSystemInfo(localNodePath, type);
+        if (!info.Exists)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void MoveNode(Node node, string newPath, string? destinationPath)
     {
         string sourcePath;
         if (destinationPath == null)
         {
-            sourcePath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath), folderNode.Path,folderNode.Name);
+            var splitNodePath = Path.SplitPath(node.Path);
+            sourcePath = Path.MergePaths(Path.RemoveLastSection(_tree?.LocalRootPath), splitNodePath);
+            sourcePath = node.Type == NodeType.File ? 
+                Path.MergeFileNameToPath(sourcePath, node.Name) : 
+                Path.MergePaths(sourcePath, node.Name);
         }
         else
         {
             sourcePath = destinationPath;
         }
-        
-        newPath = Path.MergePaths(newPath, folderNode.Name);
-        var directoryInfo = new DirectoryInfo(Path.RemoveLastSection(newPath));
-        if (!_tree.Exists(Path.RemoveLastSection(newPath)))
-        {
-            if (!directoryInfo.Exists)
-            {
-                throw new DirectoryNotFoundException();
-            }
 
-            try
-            {
-                folderNode.Delete();
-            }
-            catch (DeleteRootException)
-            {
-                Console.WriteLine("Cannot move the root directory.");
-            }
+        var treeRelationPath = Path.FindRelation(_tree?.LocalRootPath, newPath);
+        if (treeRelationPath == null || !_tree.Exists(Path.RemoveLastSection(treeRelationPath)))
+        {
+            AdjustTree(node, newPath, node.Type);
         }
 
-        if (!folderNode.Disposed)
+        if (!node.Disposed)
         {
-            folderNode.MoveNode(newPath);
+            node.MoveNode(treeRelationPath);
         }
-        
-        Directory.Move(sourcePath,newPath);
+
+        newPath = Path.MergePaths(newPath, node.Name);
+        switch (node.Type)
+        {
+            case NodeType.File:
+                newPath = newPath.TrimEnd('/');
+                File.Move(sourcePath, newPath);
+                break;
+            case NodeType.Folder:
+                Directory.Move(sourcePath, newPath);
+                break;
+        }
     }
-    
-    private bool Exists(string path)
+
+    private void AdjustTree(Node node, string path, NodeType type)
     {
-        if (Directory.Exists(path))
+        var info = GetFileSystemInfo(path, type);
+
+        if (!info.Exists)
         {
-            return true;
+            throw type switch
+            {
+                NodeType.File => new DirectoryNotFoundException(),
+                NodeType.Folder => new FileNotFoundException(),
+                _ => throw new InvalidOperationException("Unknown NodeType")
+            };
         }
 
-        return false;
+        node.Delete();
+    }
+
+    private FileSystemInfo GetFileSystemInfo(string path, NodeType type)
+    {
+        switch (type)
+        {
+            case NodeType.Folder:
+                return new DirectoryInfo(Path.RemoveLastSection(path).TrimEnd('/'));
+            case NodeType.File:
+                return new FileInfo(path);
+            default:
+                throw new InvalidOperationException("Unknown NodeType");
+        }
     }
 
     private void GetChildren(FolderNode folder,string path)

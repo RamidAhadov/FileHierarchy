@@ -66,6 +66,7 @@ public abstract class Node:IDisposable
 
     internal virtual void MoveNode(string newPath)
     {
+        newPath = Utilities.Path.RemoveFirstSection(newPath);
         var newPathFolders = Utilities.Path.SplitPath(newPath);
         if (!Utilities.Path.IsFolderPath(newPathFolders))
         {

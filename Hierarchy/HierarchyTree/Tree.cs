@@ -53,6 +53,8 @@ public class Tree:IEnumerable<Node>
         {
             throw new ArgumentNullException();
         }
+
+        path = Path.RemoveFirstSection(path);
         var addresses = Path.SplitPath(path);
 
         return Find(addresses);
@@ -74,8 +76,9 @@ public class Tree:IEnumerable<Node>
         {
             throw new NullReferenceException();
         }
-        
-        string[] addresses = Path.SplitPath(node.Path);
+
+        var tempPath = Path.RemoveFirstSection(node.Path);
+        string[] addresses = Path.SplitPath(tempPath);
         var result = Find(addresses);
         if (result == null)
         {
@@ -87,6 +90,7 @@ public class Tree:IEnumerable<Node>
 
     internal bool Exists(string path)
     {
+        path = Path.RemoveFirstSection(path);
         var addresses = Path.SplitPath(path);
         try
         {
@@ -106,7 +110,8 @@ public class Tree:IEnumerable<Node>
 
     internal void RemoveNode(Node node)
     {
-        var addresses = Path.SplitPath(node.Path);
+        var tempPath = Path.RemoveFirstSection(node.Path);
+        var addresses = Path.SplitPath(tempPath);
         var result = Find(addresses);
         if (result == null)
         {
