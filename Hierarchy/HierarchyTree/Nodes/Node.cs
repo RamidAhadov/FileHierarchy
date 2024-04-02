@@ -11,11 +11,13 @@ public abstract class Node:IDisposable
     private FolderNode? _parent;
     private string _name;
     private string _path;
-    public Node(string name, FolderNode? parent, NodeType type)
+    private string? _localPath;
+    public Node(string name, FolderNode? parent, string? localPath,NodeType type)
     {
         _name = name;
         _path = parent == null ? "../" : Utilities.Path.SetPath(parent.Path, parent.Name);
         _parent = parent;
+        _localPath = localPath;
         Type = type;
     }
 
@@ -41,7 +43,7 @@ public abstract class Node:IDisposable
         {
             return _path;
         }
-        set
+        private set
         {
             _path = value;
             if (this is FolderNode folderNode)
@@ -58,6 +60,19 @@ public abstract class Node:IDisposable
         {
             _parent = value;
             UpdatePath(_parent);
+        }
+    }
+
+    public string? LocalPath
+    {
+        get
+        {
+            return _localPath;
+        }
+        set
+        {
+            //TODO - UpdateLocalPath feature.
+            _localPath = value;
         }
     }
     public NodeType Type { get; }
