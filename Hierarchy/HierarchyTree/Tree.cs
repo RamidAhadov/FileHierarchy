@@ -8,16 +8,20 @@ namespace Hierarchy.HierarchyTree;
 public class Tree:IEnumerable<Node>
 {
     private FolderNode _head;
-    internal string? LocalRootPath;
+    private FolderNode _currentFolder;
+    internal readonly string? LocalRootPath;
 
     public Tree(string name)
     {
         _head = new FolderNode(name);
+        _head.IsOpen = true;
+        _currentFolder = _head;
     }
 
-    public Tree(string name, string realRootPath):this(name)
+    public Tree(string name, string localRootPath):this(name)
     {
-        LocalRootPath = realRootPath;
+        LocalRootPath = localRootPath;
+        _head.LocalPath = Path.RemoveLastSection(localRootPath);
     }
 
     public Tree(string name, FolderNode parent):this(name)
@@ -122,10 +126,56 @@ public class Tree:IEnumerable<Node>
         {
             Clear();
         }
-        else
+    }
+
+    internal FolderNode OpenFolder(string folderName)
+    {
+        FolderNode folderNode = null;
+        foreach (var child in _currentFolder.Children)
         {
-            //node.
+            if (child is FolderNode folder)
+            {
+                folderNode = folder;
+                break;
+            }
         }
+
+        if (folderNode == null)
+        {
+            throw new FolderNotFoundException($"{folderName} not exists in {_currentFolder.Name}.");
+        }
+
+        return folderNode.OpenFolder();
+    }
+
+    internal FolderNode GetCurrentFolder()
+    {
+        return _currentFolder;
+    }
+
+    internal void AppendTree(Tree tree)
+    {
+        _head.Children.Add(tree._head);
+    }
+    
+    private FolderNode RecursiveSearch(FolderNode node)
+    {
+        FolderNode openFolder = null;
+        foreach (var nodeChild in node.Children)
+        {
+            if (nodeChild is FolderNode folderNode)
+            {
+                openFolder = folderNode;
+                break;
+            }
+        }
+
+        if (openFolder == null)
+        {
+            return node;
+        }
+
+        return RecursiveSearch(openFolder);
     }
     
     IEnumerator IEnumerable.GetEnumerator()
