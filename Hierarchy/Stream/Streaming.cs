@@ -8,7 +8,7 @@ namespace Hierarchy.Stream;
 
 public class Streaming
 {
-    private readonly Tree? _tree;
+    private Tree _tree;
     public Streaming(string path)
     {
         _tree = new Tree(new DirectoryInfo(path).Name, path);
@@ -41,7 +41,7 @@ public class Streaming
             throw new ArgumentException($"{destPath} is not correct path.");
         }
         
-        var treeRelationPath = Path.FindRelation(_tree?.LocalRootPath, destPath);
+        var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, destPath);
         if (treeRelationPath == null)
         {
             throw new FolderNotFoundException($"{destPath} not found in current hierarchy");
@@ -75,7 +75,7 @@ public class Streaming
             throw new ArgumentException($"{destPath} is not correct path.");
         }
         
-        var treeRelationPath = Path.FindRelation(_tree?.LocalRootPath, destPath);
+        var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, destPath);
         if (treeRelationPath == null)
         {
             throw new FolderNotFoundException($"{destPath} not found in current hierarchy");
@@ -92,7 +92,7 @@ public class Streaming
 
     public void Remove(Node node)
     {
-        var localNodePath = Path.MergePaths(Path.RemoveLastSection(_tree?.LocalRootPath)
+        var localNodePath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath)
             , Path.SplitPath(node.Path));
         CheckDiskForExists(node, localNodePath);
         DeleteNode(node, localNodePath);
@@ -100,7 +100,7 @@ public class Streaming
 
     public void Remove(string localNodePath)
     {
-        var treeRelationPath = Path.FindRelation(_tree?.LocalRootPath, localNodePath);
+        var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, localNodePath);
         if (treeRelationPath == null)
         {
             throw new NodeNotFoundException("The node not found in current hierarchy");
@@ -118,7 +118,7 @@ public class Streaming
             throw new NodeNotFoundException($"{node.Name} not exists in current hierarchy.");
         }
 
-        var localRootPath = Path.MergePaths(Path.RemoveLastSection(_tree?.LocalRootPath), Path.SplitPath(node.Path));
+        var localRootPath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath), Path.SplitPath(node.Path));
         switch (node.Type)
         {
             case NodeType.Folder:
@@ -133,7 +133,7 @@ public class Streaming
     
     public void Rename(string path, string newName)
     {
-        var treeRelationPath = Path.FindRelation(_tree?.LocalRootPath, path);
+        var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, path);
         if (treeRelationPath == null)
         {
             throw new NodeNotFoundException($"{path} not exists in current hierarchy.");
@@ -155,23 +155,45 @@ public class Streaming
 
     public void CreateFolder(string path, string newFolderName)
     {
-        var treeRelationPath = Path.FindRelation(_tree?.LocalRootPath, path);
+        var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, path);
         if (treeRelationPath == null)
         {
             throw new NodeNotFoundException("The node not found in current hierarchy");
         }
 
-        var node = _tree?.Find(treeRelationPath);
+        var node = _tree.Find(treeRelationPath);
         if (node is FolderNode folderNode)
         {
             CreateFolderNode(folderNode, newFolderName);
         }
     }
+
+    public FolderNode GoUp()
+    {
+        var currentFolder = _tree.GetCurrentFolder();
+        if (currentFolder.Parent != null)
+        {
+            currentFolder.IsOpen = false;
+            currentFolder = currentFolder.Parent;
+            
+            return currentFolder;
+        }
+        
+        var localRootPath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath),
+            Path.SplitPath(currentFolder.Path));
+        var newLocalRootPath = Path.RemoveLastSection(localRootPath);
+        var newTree = new Tree(new DirectoryInfo(newLocalRootPath).Name,newLocalRootPath);
+        newTree.AppendTree(_tree);
+        GetChildren(newTree.GetRoot(),newLocalRootPath);
+        _tree = newTree;
+        return newTree.GetRoot();
+        
+    }
     
     private void CreateFolderNode(FolderNode node, string newFolderName)
     {
         node.AddFolder(newFolderName);
-        var localRootPath = Path.MergePaths(Path.RemoveLastSection(_tree?.LocalRootPath), Path.SplitPath(node.Path));
+        var localRootPath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath), Path.SplitPath(node.Path));
         var newFolderPath = Path.MergePaths(localRootPath, node.Name, newFolderName);
         Directory.CreateDirectory(newFolderPath);
     }
@@ -237,7 +259,7 @@ public class Streaming
         if (destinationPath == null)
         {
             var splitNodePath = Path.SplitPath(node.Path);
-            sourcePath = Path.MergePaths(Path.RemoveLastSection(_tree?.LocalRootPath), splitNodePath);
+            sourcePath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath), splitNodePath);
             sourcePath = node.Type == NodeType.File ? 
                 Path.MergeFileNameToPath(sourcePath, node.Name) : 
                 Path.MergePaths(sourcePath, node.Name);
@@ -247,7 +269,7 @@ public class Streaming
             sourcePath = destinationPath;
         }
 
-        var treeRelationPath = Path.FindRelation(_tree?.LocalRootPath, newPath);
+        var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, newPath);
         if (treeRelationPath == null || !_tree.Exists(Path.RemoveLastSection(treeRelationPath)))
         {
             AdjustTree(node, newPath, node.Type);
@@ -303,17 +325,29 @@ public class Streaming
 
     private void GetChildren(FolderNode folder,string path)
     {
-        string[] children = Directory.GetFiles(path);
+        string[] children = Directory.GetFiles(path)
+            .Where(file => !Path.GetFileName(file).StartsWith($"."))
+            .ToArray();
         foreach (var child in children)
         {
-            folder.AddFile(Path.GetFileName(child));
+            var existFolder = folder.Children.FirstOrDefault(c =>
+                c.LocalPath + c.Name == child && c.Type == NodeType.File);
+            if (existFolder == null)
+            {
+                folder.AddFile(Path.GetFileName(child), Path.RemoveLastSection(child));
+            }
         }
 
         string[] subDirectories = Directory.GetDirectories(path);
         foreach (var subDirectory in subDirectories)
         {
-            var folderName = Path.ReplaceIfExists(Path.GetFileName(subDirectory),':','/');
-            folder.AddFolder(folderName);
+            var existFolder = folder.Children.FirstOrDefault(c =>
+                c.LocalPath + c.Name == subDirectory && c.Type == NodeType.Folder);
+            if (existFolder == null)
+            {
+                var folderName = Path.ReplaceIfExists(Path.GetFileName(subDirectory),':','/');
+                folder.AddFolder(folderName, Path.RemoveLastSection(subDirectory));
+            }
         }
 
         foreach (var child in folder.Children)
