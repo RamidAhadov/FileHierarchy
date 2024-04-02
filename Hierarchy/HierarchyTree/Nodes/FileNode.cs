@@ -1,21 +1,15 @@
-using Hierarchy.Utilities;
-
 namespace Hierarchy.HierarchyTree.Nodes;
 
-public class FileNode:Node
+public class FileNode(
+    string name,
+    FolderNode? parent = default,
+    string? localPath = default)
+    : Node(name,
+        parent,
+        localPath,
+        NodeType.File)
 {
-    public FileNode(string name) : this(name, default)
-    {
-        
-    }
-
-    public FileNode(string name, FolderNode? parent) : base(name, parent, NodeType.File)
-    {
-        _fileName = name;
-    }
-
-
-    private string _fileName;
+    private string _fileName = name;
     public string Extension
     {
         get

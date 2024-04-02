@@ -155,7 +155,7 @@ public class Path
 
         foreach (var path in CheckAndSetAddresses(paths))
         {
-            basePath += path;
+            basePath += path + "/";
         }
 
         return basePath;
@@ -199,7 +199,7 @@ public class Path
         {
             if (pathSection!= null)
             {
-                result = result + pathSection + "/";
+                result += pathSection;
             }
         }
 
@@ -211,7 +211,7 @@ public class Path
     {
         for (int i = 0; i < addresses.Length; i++)
         {
-            yield return FilterAddress(addresses[i]);
+            yield return FilterAddressV2(addresses[i]);
         }
     }
 
@@ -245,6 +245,16 @@ public class Path
         }
 
         return address;
+    }
+    
+    private static string FilterAddressV2(string address)
+    {
+        if (address.StartsWith("../"))
+        {
+            address = address[3..];
+        }
+
+        return address.Replace('/', ':');
     }
     
     private static void TrimBySymbol(char symbol,ref string path)

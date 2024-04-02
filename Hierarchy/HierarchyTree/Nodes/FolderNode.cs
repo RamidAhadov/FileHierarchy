@@ -4,12 +4,8 @@ namespace Hierarchy.HierarchyTree.Nodes;
 
 public class FolderNode:Node
 {
-    public FolderNode(string name):this(name,default)
-    {
-        
-    }
-    
-    public FolderNode(string name, FolderNode? parent) : base(name, parent, NodeType.Folder)
+    public FolderNode(string name, FolderNode? parent = default, string? localPath = default) 
+        : base(name, parent, localPath, NodeType.Folder)
     {
         Children = new List<Node>();
     }
@@ -23,6 +19,8 @@ public class FolderNode:Node
             return GetAllCount();
         }
     }
+
+    public bool IsOpen { get; set; }
 
     internal void AddFolder(FolderNode node)
     {
@@ -55,10 +53,38 @@ public class FolderNode:Node
         }
     }
 
+    internal void AddFolder(string folderName, string localPath)
+    {
+        var folder = new FolderNode(folderName, this, localPath);
+
+        try
+        {
+            AddChild(folder);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+
     internal void AddFile(string fileName)
     {
         var file = new FileNode(fileName, this);
         
+        try
+        {
+            AddChild(file);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+
+    internal void AddFile(string fileName, string localPath)
+    {
+        var file = new FileNode(fileName, this, localPath);
+
         try
         {
             AddChild(file);
@@ -104,6 +130,12 @@ public class FolderNode:Node
         }
         
         RemoveChild(node);
+    }
+
+    internal FolderNode OpenFolder()
+    {
+        IsOpen = true;
+        return this;
     }
 
     private void AddChild(Node addedNode)
