@@ -143,6 +143,39 @@ public class Streaming
         RenameNode(path, newName, node);
     }
 
+    public void CreateFolder(FolderNode node,string newFolderName)
+    {
+        if (!_tree.Exists(node))
+        {
+            throw new FolderNotFoundException($"{node.Name} not exists in current hierarchy");
+        }
+
+        CreateFolderNode(node, newFolderName);
+    }
+
+    public void CreateFolder(string path, string newFolderName)
+    {
+        var treeRelationPath = Path.FindRelation(_tree?.LocalRootPath, path);
+        if (treeRelationPath == null)
+        {
+            throw new NodeNotFoundException("The node not found in current hierarchy");
+        }
+
+        var node = _tree?.Find(treeRelationPath);
+        if (node is FolderNode folderNode)
+        {
+            CreateFolderNode(folderNode, newFolderName);
+        }
+    }
+    
+    private void CreateFolderNode(FolderNode node, string newFolderName)
+    {
+        node.AddFolder(newFolderName);
+        var localRootPath = Path.MergePaths(Path.RemoveLastSection(_tree?.LocalRootPath), Path.SplitPath(node.Path));
+        var newFolderPath = Path.MergePaths(localRootPath, node.Name, newFolderName);
+        Directory.CreateDirectory(newFolderPath);
+    }
+
     private static void RenameNode(string path, string newName, Node node)
     {
         node.Rename(newName);
