@@ -111,6 +111,53 @@ public class Streaming
         DeleteNode(node, localNodePath);
     }
 
+    public void Rename(Node node, string newName)
+    {
+        if (!_tree.Exists(node))
+        {
+            throw new NodeNotFoundException($"{node.Name} not exists in current hierarchy.");
+        }
+
+        var localRootPath = Path.MergePaths(Path.RemoveLastSection(_tree?.LocalRootPath), Path.SplitPath(node.Path));
+        switch (node.Type)
+        {
+            case NodeType.Folder:
+                localRootPath = Path.MergePaths(localRootPath, node.Name);
+                break;
+            case NodeType.File:
+                localRootPath = Path.MergeFileNameToPath(localRootPath, node.Name);
+                break;
+        }
+        RenameNode(localRootPath, newName, node);
+    }
+    
+    public void Rename(string path, string newName)
+    {
+        var treeRelationPath = Path.FindRelation(_tree?.LocalRootPath, path);
+        if (treeRelationPath == null)
+        {
+            throw new NodeNotFoundException($"{path} not exists in current hierarchy.");
+        }
+
+        var node = _tree.Find(treeRelationPath);
+        RenameNode(path, newName, node);
+    }
+
+    private static void RenameNode(string path, string newName, Node node)
+    {
+        node.Rename(newName);
+        var newPath = Path.RemoveLastSection(path) + "/" + newName;
+        switch (node.Type)
+        {
+            case NodeType.Folder:
+                Directory.Move(path,newPath);
+                break;
+            case NodeType.File:
+                File.Move(path,newPath);
+                break;
+        }
+    }
+
     private static void DeleteNode(Node node, string localNodePath)
     {
         node.Delete();
