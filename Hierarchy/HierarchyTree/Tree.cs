@@ -18,10 +18,12 @@ public class Tree:IEnumerable<Node>
         _currentFolder = _head;
     }
 
-    public Tree(string name, string localRootPath):this(name)
+    public Tree(string name, string localRootPath)
     {
+        _head = new FolderNode(name, default, Path.RemoveLastSection(localRootPath));
+        _head.IsOpen = true;
+        _currentFolder = _head;
         LocalRootPath = localRootPath;
-        _head.LocalPath = Path.RemoveLastSection(localRootPath);
     }
 
     public Tree(string name, FolderNode parent):this(name)
@@ -155,6 +157,7 @@ public class Tree:IEnumerable<Node>
 
     internal void AppendTree(Tree tree)
     {
+        tree._head.Parent = this._head;
         _head.Children.Add(tree._head);
     }
     
