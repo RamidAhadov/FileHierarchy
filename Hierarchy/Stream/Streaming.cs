@@ -259,7 +259,6 @@ public class Streaming
         if (destinationPath == null)
         {
             var splitNodePath = Path.SplitPath(node.Path);
-            //Bug
             sourcePath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath), splitNodePath);
             sourcePath = node.Type == NodeType.File ? 
                 Path.MergeFileNameToPath(sourcePath, node.Name) : 
