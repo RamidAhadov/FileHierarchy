@@ -259,6 +259,7 @@ public class Streaming
         if (destinationPath == null)
         {
             var splitNodePath = Path.SplitPath(node.Path);
+            //Bug
             sourcePath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath), splitNodePath);
             sourcePath = node.Type == NodeType.File ? 
                 Path.MergeFileNameToPath(sourcePath, node.Name) : 
@@ -323,41 +324,44 @@ public class Streaming
         }
     }
 
-    private void GetChildren(FolderNode folder,string path)
+    private void GetChildren(FolderNode folder, string path, bool isFirstCall = true)
     {
-        string[] children = Directory.GetFiles(path)
-            .Where(file => !Path.GetFileName(file).StartsWith($"."))
-            .ToArray();
-        foreach (var child in children)
+        var files = Directory.GetFiles(path).Where(file => !Path.GetFileName(file).StartsWith(".")).ToList();
+        var directories = Directory.GetDirectories(path).ToList();
+
+        if (isFirstCall)
         {
-            var existFolder = folder.Children.FirstOrDefault(c =>
-                c.LocalPath + c.Name == child && c.Type == NodeType.File);
-            if (existFolder == null)
-            {
-                folder.AddFile(Path.GetFileName(child), Path.RemoveLastSection(child));
-            }
+            RemoveExistingItems(files, folder.Children.Select(child => child.LocalPath + child.Name));
+            RemoveExistingItems(directories, folder.Children.Select(child => child.LocalPath + child.Name));
         }
 
-        string[] subDirectories = Directory.GetDirectories(path);
-        foreach (var subDirectory in subDirectories)
+        foreach (var file in files)
         {
-            var existFolder = folder.Children.FirstOrDefault(c =>
-                c.LocalPath + c.Name == subDirectory && c.Type == NodeType.Folder);
-            if (existFolder == null)
-            {
-                var folderName = Path.ReplaceIfExists(Path.GetFileName(subDirectory),':','/');
-                folder.AddFolder(folderName, Path.RemoveLastSection(subDirectory));
-            }
+            folder.AddFile(Path.GetFileName(file), Path.RemoveLastSection(file));
         }
 
-        foreach (var child in folder.Children)
+        foreach (var directory in directories)
         {
-            if (child is FolderNode folderNode)
+            var folderName = Path.ReplaceIfExists(Path.GetFileName(directory), ':', '/');
+            folder.AddFolder(folderName, Path.RemoveLastSection(directory));
+        }
+
+        foreach (var child in folder.Children.OfType<FolderNode>())
+        {
+            var subPath = directories.FirstOrDefault(d => d.EndsWith(Path.ReplaceIfExists(child.Name, '/', ':')));
+            if (subPath != null)
             {
-                var subPath = subDirectories
-                    .FirstOrDefault(d => d.EndsWith(Path.ReplaceIfExists(folderNode.Name,'/',':')));
-                GetChildren(folderNode,subPath);
+                GetChildren(child, subPath, false);
             }
         }
     }
+
+    private void RemoveExistingItems(List<string> items, IEnumerable<string> existingPaths)
+    {
+        foreach (var existingPath in existingPaths)
+        {
+            items.Remove(existingPath);
+        }
+    }
+
 }
