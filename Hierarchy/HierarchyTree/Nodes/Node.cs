@@ -110,7 +110,8 @@ public abstract class Node:IDisposable
         {
             NodeName.ValidateFolderName(newName);
         }
-        
+
+        newName = newName.Replace('/', ':');
         Name = newName;
     }
 
