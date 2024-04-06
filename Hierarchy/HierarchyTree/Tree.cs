@@ -20,8 +20,9 @@ public class Tree:IEnumerable<Node>
 
     public Tree(string name, string localRootPath)
     {
-        localRootPath = Path.RemoveLastSection(localRootPath);
-        _head = new FolderNode(name, default, localRootPath);
+        //BUG - Add without last section and configure other uses
+        //localRootPath = Path.RemoveLastSection(localRootPath);
+        _head = new FolderNode(name, default, Path.RemoveLastSection(localRootPath));
         _head.IsOpen = true;
         _currentFolder = _head;
         LocalRootPath = localRootPath;
