@@ -220,6 +220,36 @@ public class Path
         return command[..(command.IndexOf(' ') - 1)];
     }
 
+    public static string[] SplitPathForCommand(string paths)
+    {
+        var count = 0;
+        var splitPaths = paths.Split(' ');
+        foreach (var path in splitPaths)
+        {
+            if (!IsPath(path))
+            {
+                return null;
+            }
+        }
+
+        return splitPaths;
+    }
+
+    private static bool IsPath(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            return false;
+        }
+
+        if (!path.Contains('/'))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     private static IEnumerable<string> CheckAndSetAddresses(string[] addresses)
     {
         for (int i = 0; i < addresses.Length; i++)
