@@ -200,7 +200,7 @@ public class Path
         {
             if (pathSection!= null)
             {
-                result += pathSection;
+                result += pathSection + "/";
             }
         }
 
