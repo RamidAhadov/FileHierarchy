@@ -217,8 +217,13 @@ public class Path
     public static string DeleteCommand(string command)
     {
         command = command.Trim();
+        var spaceIndex = command.IndexOf(' ');
+        if (spaceIndex == -1)
+        {
+            return null;
+        }
         
-        return command[..(command.IndexOf(' ') - 1)];
+        return command[(spaceIndex + 1)..];
     }
 
     public static string[] SplitPathForCommand(string paths)
@@ -251,8 +256,13 @@ public class Path
     public static string GetCommand(string input)
     {
         input = input.Trim();
-
-        return input[..input.IndexOf(' ')];
+        var spaceIndex = input.IndexOf(' ');
+        if (spaceIndex == -1)
+        {
+            return input;
+        }
+        
+        return input[..spaceIndex];
     }
 
     private static bool IsPath(string path)
