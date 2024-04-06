@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Hierarchy.Exceptions;
+using Hierarchy.HierarchyTree;
 
 #pragma warning disable CS8603 // Possible null reference return.
 
@@ -233,6 +234,18 @@ public class Path
         }
 
         return splitPaths;
+    }
+
+    public static NodeType GetTypeByPath(string path)
+    {
+        var lastSection = GetLastSection(path);
+
+        if (!Regex.IsMatch(lastSection,"^\\w+\\.\\w+$"))
+        {
+            return NodeType.Folder;
+        }
+
+        return NodeType.File;
     }
 
     private static bool IsPath(string path)
