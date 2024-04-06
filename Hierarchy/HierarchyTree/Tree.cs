@@ -65,15 +65,25 @@ public class Tree:IEnumerable<Node>
 
         return Find(addresses);
     }
-
-    public int GetTotalFolderCount()
+    
+    public int TotalFolderCount()
     {
         return GetTotalFolderCount(_head);
     }
+    
+    public int TotalFolderCount(FolderNode folderNode)
+    {
+        return GetTotalFolderCount(folderNode);
+    }
 
-    public int GetTotalFileCount()
+    public int TotalFileCount()
     {
         return GetTotalFileCount(_head);
+    }
+    
+    public int TotalFileCount(FolderNode folderNode)
+    {
+        return GetTotalFileCount(folderNode);
     }
 
     internal bool Exists(Node node)
