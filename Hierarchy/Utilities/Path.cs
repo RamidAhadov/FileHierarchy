@@ -213,6 +213,13 @@ public class Path
         return path[(lastSlashIndex + 1) ..];
     }
 
+    public static string DeleteCommand(string command)
+    {
+        command = command.Trim();
+        
+        return command[..(command.IndexOf(' ') - 1)];
+    }
+
     private static IEnumerable<string> CheckAndSetAddresses(string[] addresses)
     {
         for (int i = 0; i < addresses.Length; i++)
