@@ -189,6 +189,112 @@ public class Streaming
         return newTree.GetRoot();
         
     }
+
+    public int TotalCount()
+    {
+        return GetTotalCount(default);
+    }
+    
+    public int TotalCount(FolderNode folderNode)
+    {
+        return GetTotalCount(folderNode, default);
+    }
+    
+    public int TotalCount(string path)
+    {
+        return GetTotalCount(path, default);
+    }
+
+    public int TotalFolderCount()
+    {
+        return GetTotalCount(NodeType.Folder);
+    }
+
+    public int TotalFolderCount(FolderNode folderNode)
+    {
+        return GetTotalCount(folderNode, NodeType.Folder);
+    }
+
+    public int TotalFolderCount(string path)
+    {
+        return GetTotalCount(path, NodeType.Folder);
+    }
+
+    public int TotalFileCount()
+    {
+        return GetTotalCount(NodeType.File);
+    }
+    
+    public int TotalFileCount(FolderNode folderNode)
+    {
+        return GetTotalCount(folderNode, NodeType.File);
+    }
+    
+    public int TotalFileCount(string path)
+    {
+        return GetTotalCount(path, NodeType.File);
+    }
+    
+    
+    private int GetTotalCount(NodeType? type)
+    {
+        switch (type)
+        {
+            case NodeType.Folder:
+                return _tree.TotalFolderCount();
+            case NodeType.File:
+                return _tree.TotalFileCount();
+            case null:
+                return _tree.Count;
+            default:
+                throw new InvalidOperationException("Unknown NodeType");
+        }
+    }
+
+    private int GetTotalCount(FolderNode folderNode, NodeType? type)
+    {
+        if (folderNode == null)
+        {
+            throw new ArgumentNullException();
+        }
+        
+        switch (type)
+        {
+            case NodeType.Folder:
+                return _tree.TotalFolderCount(folderNode);
+            case NodeType.File:
+                return _tree.TotalFileCount(folderNode);
+            case null:
+                return folderNode.Count;
+            default:
+                throw new InvalidOperationException("Unknown NodeType");
+        }
+    }
+    
+    private int GetTotalCount(string path, NodeType? type)
+    {
+        var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, path);
+        var node = _tree.Find(treeRelationPath);
+        if (node == null)
+        {
+            throw new FolderNotFoundException($"{Path.GetLastSection(path)} not found.");
+        }
+
+        if (node is FolderNode folderNode)
+        {
+            switch (type)
+            {
+                case NodeType.Folder:
+                    return _tree.TotalFolderCount(folderNode);
+                case NodeType.File:
+                    return _tree.TotalFileCount(folderNode);
+                case null:
+                    return folderNode.Count;
+            }
+        }
+
+        throw new FolderNotFoundException("Cannot retrieve total count of the file.");
+    }
     
     private void CreateFolderNode(FolderNode node, string newFolderName)
     {
