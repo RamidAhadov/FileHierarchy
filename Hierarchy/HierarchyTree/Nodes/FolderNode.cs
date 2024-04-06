@@ -10,7 +10,7 @@ public class FolderNode:Node
         Children = new List<Node>();
     }
     
-    public List<Node> Children { get; set; }
+    public List<Node> Children { get; }
 
     public int Count
     {

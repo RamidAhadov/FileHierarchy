@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Hierarchy.Exceptions;
+using Hierarchy.HierarchyTree;
 
 #pragma warning disable CS8603 // Possible null reference return.
 
@@ -205,7 +206,79 @@ public class Path
 
         return result;
     }
-    
+
+    public static string GetLastSection(string path)
+    {
+        TrimBySymbol('/', ref path);
+        var lastSlashIndex = path.LastIndexOf('/');
+        return path[(lastSlashIndex + 1) ..];
+    }
+
+    public static string DeleteCommand(string command)
+    {
+        command = command.Trim();
+        var spaceIndex = command.IndexOf(' ');
+        if (spaceIndex == -1)
+        {
+            return null;
+        }
+        
+        return command[(spaceIndex + 1)..];
+    }
+
+    public static string[] SplitPathForCommand(string paths)
+    {
+        var count = 0;
+        var splitPaths = paths.Split(' ');
+        foreach (var path in splitPaths)
+        {
+            if (!IsPath(path))
+            {
+                return null;
+            }
+        }
+
+        return splitPaths;
+    }
+
+    public static NodeType GetTypeByPath(string path)
+    {
+        var lastSection = GetLastSection(path);
+
+        if (!Regex.IsMatch(lastSection,"^\\w+\\.\\w+$"))
+        {
+            return NodeType.Folder;
+        }
+
+        return NodeType.File;
+    }
+
+    public static string GetCommand(string input)
+    {
+        input = input.Trim();
+        var spaceIndex = input.IndexOf(' ');
+        if (spaceIndex == -1)
+        {
+            return input;
+        }
+        
+        return input[..spaceIndex];
+    }
+
+    private static bool IsPath(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            return false;
+        }
+
+        if (!path.Contains('/'))
+        {
+            return false;
+        }
+
+        return true;
+    }
 
     private static IEnumerable<string> CheckAndSetAddresses(string[] addresses)
     {

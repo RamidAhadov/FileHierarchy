@@ -18,10 +18,14 @@ public class Tree:IEnumerable<Node>
         _currentFolder = _head;
     }
 
-    public Tree(string name, string localRootPath):this(name)
+    public Tree(string name, string localRootPath)
     {
+        //BUG - Add without last section and configure other uses
+        //localRootPath = Path.RemoveLastSection(localRootPath);
+        _head = new FolderNode(name, default, Path.RemoveLastSection(localRootPath));
+        _head.IsOpen = true;
+        _currentFolder = _head;
         LocalRootPath = localRootPath;
-        _head.LocalPath = Path.RemoveLastSection(localRootPath);
     }
 
     public Tree(string name, FolderNode parent):this(name)
@@ -63,15 +67,25 @@ public class Tree:IEnumerable<Node>
 
         return Find(addresses);
     }
-
-    public int GetTotalFolderCount()
+    
+    public int TotalFolderCount()
     {
         return GetTotalFolderCount(_head);
     }
+    
+    public int TotalFolderCount(FolderNode folderNode)
+    {
+        return GetTotalFolderCount(folderNode);
+    }
 
-    public int GetTotalFileCount()
+    public int TotalFileCount()
     {
         return GetTotalFileCount(_head);
+    }
+    
+    public int TotalFileCount(FolderNode folderNode)
+    {
+        return GetTotalFileCount(folderNode);
     }
 
     internal bool Exists(Node node)
@@ -155,6 +169,7 @@ public class Tree:IEnumerable<Node>
 
     internal void AppendTree(Tree tree)
     {
+        tree._head.Parent = this._head;
         _head.Children.Add(tree._head);
     }
     

@@ -5,9 +5,6 @@ namespace Hierarchy.HierarchyTree.Nodes;
 
 public abstract class Node:IDisposable
 {
-    //Configure GoUpper and GoLower.
-    //Find parent via stream.
-    //Move delete via stream
     private FolderNode? _parent;
     private string _name;
     private string _path;
@@ -30,10 +27,7 @@ public abstract class Node:IDisposable
         private set
         {
             _name = value;
-            if (this is FolderNode folderNode)
-            {
-                UpdateChildrenPaths(folderNode);
-            }
+            UpdateChildrenPaths();
         }
     }
 
@@ -46,10 +40,8 @@ public abstract class Node:IDisposable
         private set
         {
             _path = value;
-            if (this is FolderNode folderNode)
-            {
-                UpdateChildrenPaths(folderNode);
-            }
+            UpdateChildrenPaths();
+            UpdateChildrenLocalPaths();
         }
     }
 
@@ -59,7 +51,8 @@ public abstract class Node:IDisposable
         set
         {
             _parent = value;
-            UpdatePath(_parent);
+            UpdatePath();
+            UpdateLocalPath();
         }
     }
 
@@ -69,14 +62,21 @@ public abstract class Node:IDisposable
         {
             return _localPath;
         }
-        set
+        private set
         {
-            //TODO - UpdateLocalPath feature.
             _localPath = value;
         }
     }
+
     public NodeType Type { get; }
     public bool IsSelected { get; set; }
+    
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        Disposed = true;
+    }
+    
     internal bool Disposed { get; set; }
 
     internal virtual void MoveNode(string newPath)
@@ -110,7 +110,8 @@ public abstract class Node:IDisposable
         {
             NodeName.ValidateFolderName(newName);
         }
-        
+
+        newName = newName.Replace('/', ':');
         Name = newName;
     }
 
@@ -137,20 +138,23 @@ public abstract class Node:IDisposable
         return GetRootNode(startNode.Parent);
     }
 
-    private void UpdatePath(FolderNode parent)
+    private void UpdatePath()
     {
-        Path = parent == null ? "../" : Utilities.Path.SetPath(parent.Path, parent.Name);
+        Path = _parent == null ? "../" : Utilities.Path.SetPath(_parent.Path, _parent.Name);
     }
 
-    private void UpdateChildrenPaths(FolderNode node)
+    private void UpdateChildrenPaths()
     {
-        foreach (var child in node.Children)
+        if (this is FolderNode folderNode)
         {
-            child.Path = Utilities.Path.SetPath(node.Path, node.Name);
+            foreach (var child in folderNode.Children)
+            {
+                child.Path = Utilities.Path.SetPath(folderNode.Path, folderNode.Name);
+            }
         }
     }
 
-    private Node GetNode(string[] path, FolderNode startNode)
+    private Node? GetNode(string[] path, FolderNode? startNode)
     {
         if (path.Length == 0)
         {
@@ -161,9 +165,19 @@ public abstract class Node:IDisposable
         return GetNode(path.Skip(1).ToArray(),node);
     }
 
-    public void Dispose()
+    private void UpdateLocalPath()
     {
-        GC.SuppressFinalize(this);
-        Disposed = true;
+        LocalPath = _parent == null ? _localPath : Utilities.Path.SetPath(_parent.LocalPath, _parent.Name);
+    }
+    
+    private void UpdateChildrenLocalPaths()
+    {
+        if (this is FolderNode folderNode)
+        {
+            foreach (var child in folderNode.Children)
+            {
+                child.LocalPath = _localPath + folderNode.Name + "/";
+            }
+        }
     }
 }

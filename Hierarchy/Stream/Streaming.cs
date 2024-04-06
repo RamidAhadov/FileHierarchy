@@ -189,6 +189,112 @@ public class Streaming
         return newTree.GetRoot();
         
     }
+
+    public int TotalCount()
+    {
+        return GetTotalCount(default);
+    }
+    
+    public int TotalCount(FolderNode folderNode)
+    {
+        return GetTotalCount(folderNode, default);
+    }
+    
+    public int TotalCount(string path)
+    {
+        return GetTotalCount(path, default);
+    }
+
+    public int TotalFolderCount()
+    {
+        return GetTotalCount(NodeType.Folder);
+    }
+
+    public int TotalFolderCount(FolderNode folderNode)
+    {
+        return GetTotalCount(folderNode, NodeType.Folder);
+    }
+
+    public int TotalFolderCount(string path)
+    {
+        return GetTotalCount(path, NodeType.Folder);
+    }
+
+    public int TotalFileCount()
+    {
+        return GetTotalCount(NodeType.File);
+    }
+    
+    public int TotalFileCount(FolderNode folderNode)
+    {
+        return GetTotalCount(folderNode, NodeType.File);
+    }
+    
+    public int TotalFileCount(string path)
+    {
+        return GetTotalCount(path, NodeType.File);
+    }
+    
+    
+    private int GetTotalCount(NodeType? type)
+    {
+        switch (type)
+        {
+            case NodeType.Folder:
+                return _tree.TotalFolderCount();
+            case NodeType.File:
+                return _tree.TotalFileCount();
+            case null:
+                return _tree.Count;
+            default:
+                throw new InvalidOperationException("Unknown NodeType");
+        }
+    }
+
+    private int GetTotalCount(FolderNode folderNode, NodeType? type)
+    {
+        if (folderNode == null)
+        {
+            throw new ArgumentNullException();
+        }
+        
+        switch (type)
+        {
+            case NodeType.Folder:
+                return _tree.TotalFolderCount(folderNode);
+            case NodeType.File:
+                return _tree.TotalFileCount(folderNode);
+            case null:
+                return folderNode.Count;
+            default:
+                throw new InvalidOperationException("Unknown NodeType");
+        }
+    }
+    
+    private int GetTotalCount(string path, NodeType? type)
+    {
+        var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, path);
+        var node = _tree.Find(treeRelationPath);
+        if (node == null)
+        {
+            throw new FolderNotFoundException($"{Path.GetLastSection(path)} not found.");
+        }
+
+        if (node is FolderNode folderNode)
+        {
+            switch (type)
+            {
+                case NodeType.Folder:
+                    return _tree.TotalFolderCount(folderNode);
+                case NodeType.File:
+                    return _tree.TotalFileCount(folderNode);
+                case null:
+                    return folderNode.Count;
+            }
+        }
+
+        throw new FolderNotFoundException("Cannot retrieve total count of the file.");
+    }
     
     private void CreateFolderNode(FolderNode node, string newFolderName)
     {
@@ -323,41 +429,44 @@ public class Streaming
         }
     }
 
-    private void GetChildren(FolderNode folder,string path)
+    private void GetChildren(FolderNode folder, string path, bool isFirstCall = true)
     {
-        string[] children = Directory.GetFiles(path)
-            .Where(file => !Path.GetFileName(file).StartsWith($"."))
-            .ToArray();
-        foreach (var child in children)
+        var files = Directory.GetFiles(path).Where(file => !Path.GetFileName(file).StartsWith(".")).ToList();
+        var directories = Directory.GetDirectories(path).ToList();
+
+        if (isFirstCall)
         {
-            var existFolder = folder.Children.FirstOrDefault(c =>
-                c.LocalPath + c.Name == child && c.Type == NodeType.File);
-            if (existFolder == null)
-            {
-                folder.AddFile(Path.GetFileName(child), Path.RemoveLastSection(child));
-            }
+            RemoveExistingItems(files, folder.Children.Select(child => child.LocalPath + child.Name));
+            RemoveExistingItems(directories, folder.Children.Select(child => child.LocalPath + child.Name));
         }
 
-        string[] subDirectories = Directory.GetDirectories(path);
-        foreach (var subDirectory in subDirectories)
+        foreach (var file in files)
         {
-            var existFolder = folder.Children.FirstOrDefault(c =>
-                c.LocalPath + c.Name == subDirectory && c.Type == NodeType.Folder);
-            if (existFolder == null)
-            {
-                var folderName = Path.ReplaceIfExists(Path.GetFileName(subDirectory),':','/');
-                folder.AddFolder(folderName, Path.RemoveLastSection(subDirectory));
-            }
+            folder.AddFile(Path.GetFileName(file), Path.RemoveLastSection(file));
         }
 
-        foreach (var child in folder.Children)
+        foreach (var directory in directories)
         {
-            if (child is FolderNode folderNode)
+            var folderName = Path.ReplaceIfExists(Path.GetFileName(directory), ':', '/');
+            folder.AddFolder(folderName, Path.RemoveLastSection(directory));
+        }
+
+        foreach (var child in folder.Children.OfType<FolderNode>())
+        {
+            var subPath = directories.FirstOrDefault(d => d.EndsWith(Path.ReplaceIfExists(child.Name, '/', ':')));
+            if (subPath != null)
             {
-                var subPath = subDirectories
-                    .FirstOrDefault(d => d.EndsWith(Path.ReplaceIfExists(folderNode.Name,'/',':')));
-                GetChildren(folderNode,subPath);
+                GetChildren(child, subPath, false);
             }
         }
     }
+
+    private void RemoveExistingItems(List<string> items, IEnumerable<string> existingPaths)
+    {
+        foreach (var existingPath in existingPaths)
+        {
+            items.Remove(existingPath);
+        }
+    }
+
 }
