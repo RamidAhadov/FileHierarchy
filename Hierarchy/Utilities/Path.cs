@@ -205,7 +205,13 @@ public class Path
 
         return result;
     }
-    
+
+    public static string GetLastSection(string path)
+    {
+        TrimBySymbol('/', ref path);
+        var lastSlashIndex = path.LastIndexOf('/');
+        return path[(lastSlashIndex + 1) ..];
+    }
 
     private static IEnumerable<string> CheckAndSetAddresses(string[] addresses)
     {
