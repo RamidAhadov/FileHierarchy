@@ -248,6 +248,13 @@ public class Path
         return NodeType.File;
     }
 
+    public static string GetCommand(string input)
+    {
+        input = input.Trim();
+
+        return input[..input.IndexOf(' ')];
+    }
+
     private static bool IsPath(string path)
     {
         if (string.IsNullOrEmpty(path))
