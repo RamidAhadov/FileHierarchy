@@ -25,7 +25,7 @@ public class Tree:IEnumerable<Node>
         _head = new FolderNode(name, default, Path.RemoveLastSection(localRootPath));
         _head.IsOpen = true;
         _currentFolder = _head;
-        LocalRootPath = localRootPath;
+        LocalRootPath = Path.RemoveLastSection(localRootPath);
     }
 
     public Tree(string name, FolderNode parent):this(name)

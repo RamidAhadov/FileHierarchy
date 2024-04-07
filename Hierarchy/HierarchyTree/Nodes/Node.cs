@@ -160,7 +160,9 @@ public abstract class Node:IDisposable
         {
             return startNode;
         }
-        var node = (FolderNode)startNode.Children.FirstOrDefault(n => n.Name == path[0] && n.Type == NodeType.Folder);
+        
+        var node = (FolderNode)startNode.Children.FirstOrDefault(n => 
+            n.Name == path[0] && n.Type == NodeType.Folder);
         
         return GetNode(path.Skip(1).ToArray(),node);
     }
