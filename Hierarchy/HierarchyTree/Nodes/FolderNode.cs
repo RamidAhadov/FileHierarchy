@@ -5,7 +5,7 @@ namespace Hierarchy.HierarchyTree.Nodes;
 public class FolderNode:Node
 {
     public FolderNode(string name, FolderNode? parent = default, string? localPath = default) 
-        : base(name, parent, localPath, NodeType.Folder)
+        : base(name.Replace(':', '/'), parent, localPath, NodeType.Folder)
     {
         Children = new List<Node>();
     }
@@ -142,7 +142,8 @@ public class FolderNode:Node
     {
         if (Exists(addedNode))
         {
-            throw new Exception($"{addedNode.Name} file already exists in this directory.");
+            var nodeType = addedNode.Type == NodeType.File ? "file" : "folder";
+            throw new Exception($"{addedNode.Name} {nodeType} already exists in this directory.");
         }
 
         switch (addedNode.Type)
