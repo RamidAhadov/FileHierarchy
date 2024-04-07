@@ -1,12 +1,13 @@
 using Hierarchy.Exceptions;
 using Hierarchy.HierarchyTree;
 using Hierarchy.HierarchyTree.Nodes;
+using Hierarchy.Stream.Abstraction;
 using Path = Hierarchy.Utilities.Path;
 #pragma warning disable CS8604 // Possible null reference argument.
 
 namespace Hierarchy.Stream;
 
-public class Streaming
+public class Streaming:IStream
 {
     private Tree _tree;
     public Streaming(string path)

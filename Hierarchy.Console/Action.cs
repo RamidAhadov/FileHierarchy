@@ -1,12 +1,13 @@
 using Hierarchy.HierarchyTree;
 using Hierarchy.Stream;
+using Hierarchy.Stream.Abstraction;
 using Path = Hierarchy.Utilities.Path;
 
 namespace Hierarchy.Console;
 
 public class Action
 {
-    private static Streaming _streaming;
+    private static IStream _streaming;
     
     public static void StartAction(string input)
     {
@@ -70,7 +71,6 @@ public class Action
             return;
         }
         
-        //var path = Path.DeleteCommand(command);
         var splitPath = command.Split(' ');
         if (command.Contains(' ') || splitPath.Length == 0)
         {
