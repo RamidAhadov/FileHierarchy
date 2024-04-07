@@ -184,10 +184,7 @@ public class Path
         {
             if (splitBasePath[i] == splitLocalPath[i])
             {
-                if (i != splitBasePath.Length - 1)
-                {
-                    splitLocalPath[i] = null;
-                }
+                splitLocalPath[i] = null;
             }
             else
             {
