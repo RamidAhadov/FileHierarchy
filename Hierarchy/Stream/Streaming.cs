@@ -92,8 +92,8 @@ public class Streaming
 
     public void Remove(Node node)
     {
-        var localNodePath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath)
-            , Path.SplitPath(node.Path));
+        var localNodePath = Path.MergePaths(_tree.LocalRootPath
+            , Path.SplitPath(node.Path)) + node.Name;
         CheckDiskForExists(node, localNodePath);
         DeleteNode(node, localNodePath);
     }
@@ -118,7 +118,7 @@ public class Streaming
             throw new NodeNotFoundException($"{node.Name} not exists in current hierarchy.");
         }
 
-        var localRootPath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath), Path.SplitPath(node.Path));
+        var localRootPath = Path.MergePaths(_tree.LocalRootPath, Path.SplitPath(node.Path));
         switch (node.Type)
         {
             case NodeType.Folder:
@@ -179,7 +179,7 @@ public class Streaming
             return currentFolder;
         }
         
-        var localRootPath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath),
+        var localRootPath = Path.MergePaths(_tree.LocalRootPath,
             Path.SplitPath(currentFolder.Path));
         var newLocalRootPath = Path.RemoveLastSection(localRootPath);
         var newTree = new Tree(new DirectoryInfo(newLocalRootPath).Name,newLocalRootPath);
@@ -299,7 +299,7 @@ public class Streaming
     private void CreateFolderNode(FolderNode node, string newFolderName)
     {
         node.AddFolder(newFolderName);
-        var localRootPath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath), Path.SplitPath(node.Path));
+        var localRootPath = Path.MergePaths(_tree.LocalRootPath, Path.SplitPath(node.Path));
         var newFolderPath = Path.MergePaths(localRootPath, node.Name, newFolderName);
         Directory.CreateDirectory(newFolderPath);
     }
@@ -365,7 +365,7 @@ public class Streaming
         if (destinationPath == null)
         {
             var splitNodePath = Path.SplitPath(node.Path);
-            sourcePath = Path.MergePaths(Path.RemoveLastSection(_tree.LocalRootPath), splitNodePath);
+            sourcePath = Path.MergePaths(_tree.LocalRootPath, splitNodePath); // - /Users/macbook/Desktop/RamidNew/Aha:/ - Changed version
             sourcePath = node.Type == NodeType.File ? 
                 Path.MergeFileNameToPath(sourcePath, node.Name) : 
                 Path.MergePaths(sourcePath, node.Name);
@@ -376,7 +376,7 @@ public class Streaming
         }
 
         var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, newPath);
-        if (treeRelationPath == null || !_tree.Exists(Path.RemoveLastSection(treeRelationPath)))
+        if (treeRelationPath == null || !_tree.Exists(Path.RemoveLastSection(treeRelationPath))) //../Desktop/RamidNew/ - changed version - ../RamidNew/
         {
             AdjustTree(node, newPath, node.Type);
         }
@@ -437,7 +437,7 @@ public class Streaming
         if (isFirstCall)
         {
             RemoveExistingItems(files, folder.Children.Select(child => child.LocalPath + child.Name));
-            RemoveExistingItems(directories, folder.Children.Select(child => child.LocalPath + child.Name));
+            RemoveExistingItems(directories, folder.Children.Select(child => child.LocalPath + child.Name.Replace('/',':')));
         }
 
         foreach (var file in files)
@@ -447,7 +447,7 @@ public class Streaming
 
         foreach (var directory in directories)
         {
-            var folderName = Path.ReplaceIfExists(Path.GetFileName(directory), ':', '/');
+            var folderName = Path.GetFileName(directory);
             folder.AddFolder(folderName, Path.RemoveLastSection(directory));
         }
 
