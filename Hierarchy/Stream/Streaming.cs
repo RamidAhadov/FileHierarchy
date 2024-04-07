@@ -366,7 +366,7 @@ public class Streaming:IStream
         if (destinationPath == null)
         {
             var splitNodePath = Path.SplitPath(node.Path);
-            sourcePath = Path.MergePaths(_tree.LocalRootPath, splitNodePath); // - /Users/macbook/Desktop/RamidNew/Aha:/ - Changed version
+            sourcePath = Path.MergePaths(_tree.LocalRootPath, splitNodePath);
             sourcePath = node.Type == NodeType.File ? 
                 Path.MergeFileNameToPath(sourcePath, node.Name) : 
                 Path.MergePaths(sourcePath, node.Name);
@@ -377,7 +377,7 @@ public class Streaming:IStream
         }
 
         var treeRelationPath = Path.FindRelation(_tree.LocalRootPath, newPath);
-        if (treeRelationPath == null || !_tree.Exists(Path.RemoveLastSection(treeRelationPath))) //../Desktop/RamidNew/ - changed version - ../RamidNew/
+        if (treeRelationPath == null || !_tree.Exists(Path.RemoveLastSection(treeRelationPath)))
         {
             AdjustTree(node, newPath, node.Type);
         }
