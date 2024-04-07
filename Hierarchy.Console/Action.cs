@@ -53,7 +53,7 @@ public class Action
 
     private static void ShowInfo()
     {
-        System.Console.WriteLine("Info message");
+        System.Console.WriteLine(_info);
     }
 
     private static void CreateTree(string command)
@@ -224,13 +224,13 @@ public class Action
                 switch (type)
                 {
                     case NodeType.Folder:
-                        System.Console.WriteLine(_streaming.TotalFolderCount());
+                        System.Console.WriteLine($"Total folders count: {_streaming.TotalFolderCount()}");
                         break;
                     case NodeType.File:
-                        System.Console.WriteLine(_streaming.TotalFileCount());
+                        System.Console.WriteLine($"Total files count: {_streaming.TotalFileCount()}");
                         break;
                     case null:
-                        System.Console.WriteLine(_streaming.TotalCount());
+                        System.Console.WriteLine($"Total items count: {_streaming.TotalCount()}");
                         break;
                 }
                 break;
@@ -238,13 +238,13 @@ public class Action
                 switch (type)
                 {
                     case NodeType.Folder:
-                        System.Console.WriteLine(_streaming.TotalFolderCount(splitPath[0]));
+                        System.Console.WriteLine($"Total folders count: {_streaming.TotalFolderCount(splitPath[0])}");
                         break;
                     case NodeType.File:
-                        System.Console.WriteLine(_streaming.TotalFileCount(splitPath[0]));
+                        System.Console.WriteLine($"Total files count: {_streaming.TotalFileCount(splitPath[0])}");
                         break;
                     case null:
-                        System.Console.WriteLine(_streaming.TotalCount(splitPath[0]));
+                        System.Console.WriteLine($"Total items count: {_streaming.TotalCount(splitPath[0])}");
                         break;
                 }
                 break;
@@ -297,4 +297,8 @@ public class Action
             throw new NullReferenceException("Tree was not created.");
         }
     }
+
+    private const string _info = "You can use below commands: " +
+                                 "\nhelp\ntree\nmove\nremove\nrename\ngetcount\ngetfilecount" +
+                                 "\ngetfoldercount\nprint\nup\nexit";
 }
